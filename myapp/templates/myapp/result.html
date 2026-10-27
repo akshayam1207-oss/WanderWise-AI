@@ -64,7 +64,14 @@
 
 <nav class="navbar">
     <a href="/" class="logo">✈ WanderWise <span>AI</span></a>
-    <a href="/" class="nav-button">Plan Another Trip</a>
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/destinations/">Destinations</a>
+        <a href="/faq/">FAQ</a>
+        <a href="/health/">System Health</a>
+        <a href="/errors/">Error Guide</a>
+    </div>
+    <a href="/" class="nav-button">Plan Another Trip ↗</a>
 </nav>
 
 <section class="planner-section">
@@ -77,6 +84,15 @@
                 {{ travelers }} traveler(s) · ₹{{ budget }} total · about ₹{{ per_person_per_day }} per person per day
                 {% if start_date %}<br>📅 {{ start_date }} → {{ end_date }}{% endif %}
             </p>
+
+            
+            {% if weather %}
+            <div style="margin-top:16px;background:#f8f9ff;border:1px solid var(--border);border-radius:14px;padding:12px 20px;display:inline-flex;align-items:center;gap:16px;">
+                <span style="font-size:22px;">{{ weather.condition }}</span>
+                <span style="font-weight:700;color:var(--primary);font-size:16px;">{{ weather.temperature }}°C in {{ destination }}</span>
+                <span style="font-size:12px;color:var(--muted);">({% if weather.is_fallback %}Fallback Climate Data{% else %}Live Meteorological Feed{% endif %})</span>
+            </div>
+            {% endif %}
 
             <div class="r-chips">
                 <span class="r-chip">🚗 {{ mode_label }}</span>
@@ -170,5 +186,6 @@
     });
 </script>
 
+{% include "myapp/chat_widget.html" %}
 </body>
 </html>

@@ -1,0 +1,111 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>400 - Bad Request | WanderWise AI</title>
+    <link rel="stylesheet" href="{% static 'myapp/style.css' %}">
+
+    <style>
+        .error-page-wrapper {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+        .error-box {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 26px;
+            padding: 50px 40px;
+            max-width: 620px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(103, 85, 232, 0.12);
+        }
+        .error-code-badge {
+            font-size: 80px;
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: -2px;
+            background: linear-gradient(135deg, #f59e0b, #6755e8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+        }
+        .error-box h1 {
+            font-size: 26px;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+        .error-box p {
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+        .error-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .btn-assistant {
+            background: linear-gradient(135deg, #6755e8, #4e3bc5);
+            color: #ffffff;
+            border: none;
+            padding: 13px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(103, 85, 232, 0.35);
+            transition: transform 0.2s;
+        }
+        .btn-assistant:hover { transform: translateY(-2px); }
+        .btn-home {
+            background: #ffffff;
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 13px 22px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/" class="logo">✈ WanderWise <span>AI</span></a>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/destinations/">Destinations</a>
+            <a href="/faq/">FAQ</a>
+            <a href="/health/">System Health</a>
+            <a href="/errors/">Error Guide</a>
+        </div>
+        <a href="/#planner" class="nav-button">Plan a Trip ↗</a>
+    </nav>
+
+    <div class="error-page-wrapper">
+        <div class="error-box">
+            <div class="error-code-badge">400</div>
+            <h1>400 - Bad Request</h1>
+            <p>{{ message|default:"The server could not understand the request due to invalid parameters or missing required fields in your trip planner form." }}</p>
+
+            <div class="error-actions">
+                <button type="button" class="btn-assistant" onclick="openWanderWiseChat('Explain Error 400 Bad Request')">
+                    💬 Ask the Assistant for Help
+                </button>
+                <a href="/#planner" class="btn-home">← Back to Trip Planner</a>
+            </div>
+        </div>
+    </div>
+
+    {% include "myapp/chat_widget.html" %}
+
+</body>
+</html>

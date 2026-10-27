@@ -1,0 +1,445 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }}</title>
+    <link rel="stylesheet" href="{% static 'myapp/style.css' %}">
+
+    <style>
+        .page-header {
+            background: linear-gradient(135deg, #10152c, #1f2852);
+            color: #ffffff;
+            padding: 60px 7% 50px;
+            text-align: center;
+        }
+        .page-header h1 {
+            font-size: clamp(30px, 4vw, 42px);
+            letter-spacing: -1px;
+            margin: 10px 0 10px;
+        }
+        .page-header p {
+            color: #b3b9d4;
+            max-width: 650px;
+            margin: 0 auto;
+            font-size: 15px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: -30px auto 80px;
+            padding: 0 20px;
+        }
+
+        .status-summary-bar {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 20px 28px;
+            box-shadow: 0 16px 45px rgba(52, 58, 107, 0.08);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        .system-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #dcfce7;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+        .system-pill-dot {
+            width: 9px;
+            height: 9px;
+            background: #22c55e;
+            border-radius: 50%;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.3);
+        }
+
+        .btn-raw-json {
+            background: #f1edff;
+            color: var(--primary);
+            border: 1px solid #ddd6fe;
+            padding: 9px 18px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .btn-raw-json:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        /* 4-Card Service Grid */
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .svc-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 22px;
+            box-shadow: 0 10px 30px rgba(52, 58, 107, 0.04);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .svc-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+        .svc-icon {
+            font-size: 26px;
+        }
+        .badge-healthy {
+            background: #dcfce7;
+            color: #166534;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .badge-standby {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .svc-card h3 {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        .svc-card p {
+            font-size: 12.5px;
+            color: var(--muted);
+            margin: 0 0 12px;
+        }
+        .svc-meta {
+            border-top: 1px dashed var(--border);
+            padding-top: 10px;
+            font-size: 12px;
+            color: #555;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .svc-meta strong { color: var(--text); }
+
+        /* Traffic Stats Banner */
+        .stats-banner {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 22px 28px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(52, 58, 107, 0.04);
+        }
+        .stats-banner h3 {
+            font-size: 17px;
+            margin-bottom: 16px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 16px;
+            text-align: center;
+        }
+        .stat-box {
+            background: #f8f9ff;
+            border-radius: 12px;
+            padding: 14px 10px;
+            border: 1px solid #ebebf5;
+        }
+        .stat-num {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        .stat-label {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        /* Request Logging Table */
+        .log-section {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 26px;
+            box-shadow: 0 12px 38px rgba(52, 58, 107, 0.05);
+        }
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+        .log-header h3 { font-size: 18px; }
+        .log-table-wrap {
+            overflow-x: auto;
+        }
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+        }
+        .log-table th {
+            background: #f8f9ff;
+            padding: 12px 14px;
+            font-weight: 700;
+            color: var(--text);
+            border-bottom: 2px solid var(--border);
+        }
+        .log-table td {
+            padding: 11px 14px;
+            border-bottom: 1px solid #f0f0f7;
+            color: #333;
+        }
+        .log-table tr:hover td {
+            background: #fafaff;
+        }
+        .badge-status {
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            display: inline-block;
+        }
+        .status-200 { background: #dcfce7; color: #15803d; }
+        .status-300 { background: #e0f2fe; color: #0369a1; }
+        .status-400 { background: #fef3c7; color: #b45309; }
+        .status-500 { background: #fee2e2; color: #b91c1c; }
+
+        @media (max-width: 900px) {
+            .service-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .stats-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
+        @media (max-width: 600px) {
+            .service-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <a href="/" class="logo">✈ WanderWise <span>AI</span></a>
+
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/destinations/">Destinations</a>
+            <a href="/faq/">FAQ</a>
+            <a href="/health/" style="color:var(--primary);font-weight:700;">System Health</a>
+            <a href="/errors/">Error Guide</a>
+        </div>
+
+        <a href="/#planner" class="nav-button">Plan a Trip ↗</a>
+    </nav>
+
+    <!-- Header Section -->
+    <header class="page-header">
+        <h1>System Health &amp; Request Monitor</h1>
+        <p>Live health metrics across SQL database, MongoDB chat storage, Third-Party API timeout handling, and HTTP request logs.</p>
+    </header>
+
+    <main class="container">
+        <!-- Status Bar -->
+        <div class="status-summary-bar">
+            <div>
+                <span class="system-pill"><span class="system-pill-dot"></span> System Status: ALL SYSTEMS OPERATIONAL</span>
+                <span style="margin-left:14px;font-size:13px;color:var(--muted);">Updated: {{ health.timestamp }}</span>
+            </div>
+            <div style="display:flex;gap:10px;">
+                <a href="{% url 'health' %}" class="btn-raw-json">🔄 Refresh Status</a>
+                <a href="{% url 'health' %}?format=json" target="_blank" class="btn-raw-json">⚙ View JSON API</a>
+            </div>
+        </div>
+
+        <!-- 4-Card Service Diagnostics -->
+        <div class="service-grid">
+            <!-- 1. SQL Database -->
+            <div class="svc-card">
+                <div>
+                    <div class="svc-header">
+                        <span class="svc-icon">🗄️</span>
+                        <span class="badge-healthy">Connected</span>
+                    </div>
+                    <h3>SQL Database</h3>
+                    <p>Stores at least 10 FAQs &amp; user support tickets via Django ORM.</p>
+                </div>
+                <div class="svc-meta">
+                    <div>FAQs Stored: <strong>{{ health.sql_database.faqs_stored }} questions</strong></div>
+                    <div>Support Tickets: <strong>{{ health.sql_database.support_tickets_stored }} tickets</strong></div>
+                    <div>Ping Latency: <strong>{{ health.sql_database.latency_ms }} ms</strong></div>
+                </div>
+            </div>
+
+            <!-- 2. MongoDB -->
+            <div class="svc-card">
+                <div>
+                    <div class="svc-header">
+                        <span class="svc-icon">🍃</span>
+                        {% if health.mongodb.connected %}
+                            <span class="badge-healthy">Operational</span>
+                        {% else %}
+                            <span class="badge-standby">Standby Buffer</span>
+                        {% endif %}
+                    </div>
+                    <h3>MongoDB Storage</h3>
+                    <p>Stores real-time AI chat logs &amp; user feedback ratings.</p>
+                </div>
+                <div class="svc-meta">
+                    <div>Status: <strong>{{ health.mongodb.status }}</strong></div>
+                    <div>Chat Logs: <strong>{{ health.mongodb.chat_logs_count }} records</strong></div>
+                    <div>Feedback Entries: <strong>{{ health.mongodb.feedback_count }} records</strong></div>
+                </div>
+            </div>
+
+            <!-- 3. Third-Party Weather API -->
+            <div class="svc-card">
+                <div>
+                    <div class="svc-header">
+                        <span class="svc-icon">🌦️</span>
+                        {% if weather_info.is_fallback %}
+                            <span class="badge-standby">Fallback Active</span>
+                        {% else %}
+                            <span class="badge-healthy">Live SLA</span>
+                        {% endif %}
+                    </div>
+                    <h3>Third-Party API</h3>
+                    <p>Open-Meteo Meteorological feed with 3.0s strict timeout &amp; fallback.</p>
+                </div>
+                <div class="svc-meta">
+                    <div>Test City: <strong>{{ weather_info.destination }}</strong> ({{ weather_info.temperature }}°C)</div>
+                    <div>Mode: <strong>{% if weather_info.is_fallback %}Fallback Cache{% else %}Live Network{% endif %}</strong></div>
+                    <div>Duration: <strong>{{ weather_info.response_time_ms }} ms</strong></div>
+                </div>
+            </div>
+
+            <!-- 4. AI Assistant Engine -->
+            <div class="svc-card">
+                <div>
+                    <div class="svc-header">
+                        <span class="svc-icon">🤖</span>
+                        <span class="badge-healthy">Online</span>
+                    </div>
+                    <h3>AI Assistant</h3>
+                    <p>FAQ query matching, 8 error code explanations, &amp; Gemini integration.</p>
+                </div>
+                <div class="svc-meta">
+                    <div>Error Codes: <strong>8 Codes Supported</strong></div>
+                    <div>Engine: <strong>SQL Grounded + Generative AI</strong></div>
+                    <div>Fallback Mode: <strong>Self-contained</strong></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Request Traffic Stats -->
+        <div class="stats-banner">
+            <h3>📊 HTTP Traffic Statistics (Request Logging Middleware)</h3>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-num">{{ stats.total }}</div>
+                    <div class="stat-label">Total Requests</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num" style="color:#16a34a;">{{ stats.status_2xx }}</div>
+                    <div class="stat-label">2xx Success</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num" style="color:#0284c7;">{{ stats.status_3xx }}</div>
+                    <div class="stat-label">3xx Redirect</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num" style="color:#d97706;">{{ stats.status_4xx }}</div>
+                    <div class="stat-label">4xx Client Errors</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num" style="color:#6755e8;">{{ stats.avg_latency_ms }}<small style="font-size:14px;">ms</small></div>
+                    <div class="stat-label">Avg Response Time</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Request Log Table -->
+        <div class="log-section">
+            <div class="log-header">
+                <div>
+                    <h3>📝 Recent Request Activity (Last 50 Inbound Requests)</h3>
+                    <p style="font-size:13px;color:var(--muted);margin:2px 0 0;">Captured automatically by WanderWise RequestLoggingMiddleware with latency measurements.</p>
+                </div>
+                <button type="button" class="btn-raw-json" onclick="location.reload()">Refresh Logs</button>
+            </div>
+
+            <div class="log-table-wrap">
+                <table class="log-table">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Method</th>
+                            <th>Path</th>
+                            <th>Status</th>
+                            <th>Latency</th>
+                            <th>Client IP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if recent_requests %}
+                            {% for req in recent_requests %}
+                            <tr>
+                                <td>{{ req.timestamp }}</td>
+                                <td><strong>{{ req.method }}</strong></td>
+                                <td><code>{{ req.path }}</code></td>
+                                <td>
+                                    <span class="badge-status {% if req.status_code < 300 %}status-200{% elif req.status_code < 400 %}status-300{% elif req.status_code < 500 %}status-400{% else %}status-500{% endif %}">
+                                        {{ req.status_code }}
+                                    </span>
+                                </td>
+                                <td>{{ req.duration_ms }} ms</td>
+                                <td><code>{{ req.client_ip }}</code></td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" style="text-align:center;padding:24px;color:var(--muted);">No requests recorded yet. Make a few requests to populate the table!</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <a href="/" class="logo">✈ WanderWise <span>AI</span></a>
+        <p>Explore more. Worry less. Travel smarter.</p>
+        <small>© 2026 WanderWise AI · Full Observability &amp; Request Logging.</small>
+    </footer>
+
+    <!-- Chat Widget (Included on Every Page) -->
+    {% include "myapp/chat_widget.html" %}
+
+</body>
+</html>

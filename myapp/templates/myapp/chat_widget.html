@@ -1,0 +1,738 @@
+<!-- WanderWise AI Support Chat Widget (Included on Every Page) -->
+<div id="ww-chat-widget">
+    <!-- Floating Launcher Button -->
+    <button id="ww-chat-trigger" aria-label="Ask WanderWise AI" title="Ask WanderWise AI Assistant">
+        <span class="ww-chat-icon">💬</span>
+        <span class="ww-chat-label">Ask WanderWise AI</span>
+        <span class="ww-pulse-dot"></span>
+    </button>
+
+    <!-- Chat Popup Window -->
+    <div id="ww-chat-window" class="ww-chat-hidden" role="dialog" aria-labelledby="ww-chat-title">
+        <!-- Header -->
+        <div class="ww-chat-header">
+            <div class="ww-header-info">
+                <div class="ww-avatar">✈️</div>
+                <div>
+                    <h3 id="ww-chat-title">WanderWise AI</h3>
+                    <p class="ww-status"><span class="ww-status-dot"></span> Online · FAQ & Error Assistant</p>
+                </div>
+            </div>
+            <div class="ww-header-actions">
+                <button type="button" id="ww-chat-ticket-toggle" class="ww-header-btn" title="Create Support Ticket">🎫</button>
+                <button type="button" id="ww-chat-close" class="ww-header-btn" title="Close Chat">✕</button>
+            </div>
+        </div>
+
+        <!-- Chat Messages Container -->
+        <div class="ww-chat-body" id="ww-chat-messages">
+            <!-- Initial Welcome Message -->
+            <div class="ww-msg ww-msg-bot">
+                <div class="ww-msg-avatar">🤖</div>
+                <div class="ww-msg-content">
+                    <p>👋 <strong>Hello! I'm WanderWise AI</strong>, your travel support assistant.</p>
+                    <p>I can help you with:</p>
+                    <ul>
+                        <li>Trip planning &amp; budget estimation</li>
+                        <li>Answering all 10+ website FAQs</li>
+                        <li>Explaining error codes (400, 401, 403, 404, 429, 500, 503, WW-600)</li>
+                        <li>Creating a support ticket if you need personal assistance</li>
+                    </ul>
+                    <div class="ww-quick-chips">
+                        <button type="button" class="ww-chip" onclick="wwSendQuick('How do I plan a trip?')">✈️ How to plan trip?</button>
+                        <button type="button" class="ww-chip" onclick="wwSendQuick('Is WanderWise free to use?')">💰 Is it free?</button>
+                        <button type="button" class="ww-chip" onclick="wwSendQuick('Explain Error 404')">⚠️ Explain 404</button>
+                        <button type="button" class="ww-chip" onclick="wwSendQuick('What does error WW-600 mean?')">⚠️ Explain WW-600</button>
+                        <button type="button" class="ww-chip" onclick="wwOpenTicketForm()">🎫 Support Ticket</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inline Support Ticket Form (Toggled when needed) -->
+        <div id="ww-ticket-form-panel" class="ww-ticket-hidden">
+            <div class="ww-ticket-header">
+                <h4>🎫 Create Support Ticket</h4>
+                <button type="button" onclick="wwCloseTicketForm()" class="ww-ticket-close">✕</button>
+            </div>
+            <form id="ww-ticket-form" onsubmit="wwSubmitTicket(event)">
+                <input type="text" id="ww-tck-name" placeholder="Your Name" required>
+                <input type="email" id="ww-tck-email" placeholder="Your Email" required>
+                <select id="ww-tck-category">
+                    <option value="General Inquiry">General Inquiry</option>
+                    <option value="Trip Planning Issue">Trip Planning Issue</option>
+                    <option value="Error Troubleshooting">Error Code Assistance</option>
+                    <option value="Feedback & Suggestions">Feedback & Suggestions</option>
+                </select>
+                <input type="text" id="ww-tck-subject" placeholder="Subject / Summary" required>
+                <textarea id="ww-tck-message" rows="3" placeholder="Describe what you need help with..." required></textarea>
+                <button type="submit" class="ww-btn-submit-ticket" id="ww-tck-submit-btn">Submit Ticket to SQL Database →</button>
+            </form>
+        </div>
+
+        <!-- Chat Input Footer -->
+        <div class="ww-chat-footer">
+            <form id="ww-chat-form" onsubmit="wwHandleSubmit(event)">
+                <input type="text" id="ww-chat-input" placeholder="Ask about trips, FAQs or error codes..." autocomplete="off">
+                <button type="submit" id="ww-chat-send" aria-label="Send Message">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+/* ===================================================
+   WANDERWISE AI CHAT WIDGET STYLES (PURPLE THEME)
+=================================================== */
+#ww-chat-widget {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 10000;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Adjust scroll-to-top button so it doesn't collide */
+#toTop {
+    right: 24px !important;
+    bottom: 84px !important;
+}
+
+/* Launcher Button */
+#ww-chat-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #6755e8, #4e3bc5);
+    color: #ffffff;
+    border: none;
+    border-radius: 50px;
+    padding: 13px 22px;
+    font-size: 15px;
+    font-weight: 700;
+    box-shadow: 0 10px 30px rgba(103, 85, 232, 0.45);
+    cursor: pointer;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+#ww-chat-trigger:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 14px 38px rgba(103, 85, 232, 0.6);
+}
+.ww-chat-icon { font-size: 20px; }
+.ww-pulse-dot {
+    width: 9px;
+    height: 9px;
+    background: #22c55e;
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.35);
+    animation: wwPulse 2s infinite;
+}
+@keyframes wwPulse {
+    0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6); }
+    70% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+/* Chat Window */
+#ww-chat-window {
+    position: fixed;
+    right: 24px;
+    bottom: 92px;
+    width: 390px;
+    max-width: calc(100vw - 32px);
+    height: 580px;
+    max-height: calc(100vh - 120px);
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(32, 36, 58, 0.25), 0 0 0 1px rgba(103, 85, 232, 0.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+    z-index: 10001;
+}
+#ww-chat-window.ww-chat-hidden {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px) scale(0.96);
+    pointer-events: none;
+}
+
+/* Header */
+.ww-chat-header {
+    background: linear-gradient(135deg, #6755e8, #4e3bc5);
+    color: #ffffff;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.ww-header-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.ww-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.22);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+}
+.ww-chat-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+}
+.ww-status {
+    margin: 2px 0 0;
+    font-size: 11.5px;
+    opacity: 0.92;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.ww-status-dot {
+    width: 7px;
+    height: 7px;
+    background: #4ade80;
+    border-radius: 50%;
+}
+.ww-header-actions {
+    display: flex;
+    gap: 6px;
+}
+.ww-header-btn {
+    background: rgba(255, 255, 255, 0.18);
+    border: none;
+    color: #ffffff;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+.ww-header-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Chat Body */
+.ww-chat-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    background: #fbfbfe;
+}
+.ww-msg {
+    display: flex;
+    gap: 10px;
+    max-width: 88%;
+    animation: wwMsgFade 0.25s ease;
+}
+@keyframes wwMsgFade {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+}
+.ww-msg-bot {
+    align-self: flex-start;
+}
+.ww-msg-user {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+.ww-msg-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #ece8ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+.ww-msg-content {
+    background: #ffffff;
+    border: 1px solid #ebebf3;
+    border-radius: 14px;
+    padding: 12px 14px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: #20243a;
+    box-shadow: 0 4px 14px rgba(52, 58, 107, 0.04);
+}
+.ww-msg-user .ww-msg-content {
+    background: #6755e8;
+    color: #ffffff;
+    border-color: #6755e8;
+    border-bottom-right-radius: 3px;
+}
+.ww-msg-bot .ww-msg-content {
+    border-bottom-left-radius: 3px;
+}
+.ww-msg-content p { margin: 0 0 6px; }
+.ww-msg-content p:last-child { margin-bottom: 0; }
+.ww-msg-content ul, .ww-msg-content ol { margin: 6px 0; padding-left: 18px; }
+.ww-msg-content li { margin-bottom: 4px; }
+.ww-msg-content strong { color: inherit; }
+
+/* Quick chips */
+.ww-quick-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+}
+.ww-chip {
+    background: #f1edff;
+    color: #5541d4;
+    border: 1px solid #ddd6fe;
+    border-radius: 20px;
+    padding: 5px 11px;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.ww-chip:hover {
+    background: #6755e8;
+    color: #ffffff;
+    border-color: #6755e8;
+    transform: translateY(-1px);
+}
+
+/* Feedback Row */
+.ww-feedback-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed #e8e9f3;
+    font-size: 11px;
+    color: #777c91;
+}
+.ww-fb-btn {
+    background: none;
+    border: 1px solid #e0e2ed;
+    border-radius: 6px;
+    padding: 2px 7px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background 0.2s;
+}
+.ww-fb-btn:hover { background: #f0f1fa; }
+.ww-fb-btn.active { background: #e0f2fe; border-color: #38bdf8; }
+
+/* Ticket Form Panel */
+#ww-ticket-form-panel {
+    background: #ffffff;
+    border-top: 1px solid #ebebf3;
+    padding: 14px 18px;
+    box-shadow: 0 -4px 16px rgba(0,0,0,0.04);
+}
+#ww-ticket-form-panel.ww-ticket-hidden {
+    display: none;
+}
+.ww-ticket-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.ww-ticket-header h4 {
+    margin: 0;
+    font-size: 13.5px;
+    color: #6755e8;
+}
+.ww-ticket-close {
+    background: none;
+    border: none;
+    font-size: 13px;
+    color: #888;
+    cursor: pointer;
+}
+#ww-ticket-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+#ww-ticket-form input,
+#ww-ticket-form select,
+#ww-ticket-form textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #dcdde8;
+    border-radius: 8px;
+    font-size: 12px;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+#ww-ticket-form input:focus,
+#ww-ticket-form select:focus,
+#ww-ticket-form textarea:focus {
+    outline: none;
+    border-color: #6755e8;
+}
+.ww-btn-submit-ticket {
+    background: #6755e8;
+    color: #fff;
+    border: none;
+    padding: 9px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.ww-btn-submit-ticket:hover {
+    background: #4e3bc5;
+}
+
+/* Chat Footer */
+.ww-chat-footer {
+    padding: 12px 14px;
+    background: #ffffff;
+    border-top: 1px solid #ebebf3;
+}
+#ww-chat-form {
+    display: flex;
+    gap: 8px;
+}
+#ww-chat-input {
+    flex: 1;
+    border: 1px solid #dcdde8;
+    border-radius: 24px;
+    padding: 10px 16px;
+    font-size: 13.5px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+#ww-chat-input:focus {
+    border-color: #6755e8;
+}
+#ww-chat-send {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #6755e8;
+    color: #ffffff;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+    flex-shrink: 0;
+}
+#ww-chat-send:hover {
+    background: #4e3bc5;
+    transform: scale(1.05);
+}
+
+/* Typing Indicator */
+.ww-typing {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+}
+.ww-typing span {
+    width: 6px;
+    height: 6px;
+    background: #999cb5;
+    border-radius: 50%;
+    animation: wwTypingDot 1.2s infinite;
+}
+.ww-typing span:nth-child(2) { animation-delay: 0.2s; }
+.ww-typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes wwTypingDot {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-5px); }
+}
+
+@media (max-width: 480px) {
+    #ww-chat-window {
+        right: 12px;
+        bottom: 84px;
+        width: calc(100vw - 24px);
+        height: calc(100vh - 100px);
+    }
+    #ww-chat-trigger {
+        padding: 11px 18px;
+        font-size: 14px;
+    }
+}
+</style>
+
+<script>
+/* ===================================================
+   WANDERWISE AI CHAT CLIENT SCRIPT
+=================================================== */
+(function() {
+    const trigger = document.getElementById("ww-chat-trigger");
+    const windowEl = document.getElementById("ww-chat-window");
+    const closeBtn = document.getElementById("ww-chat-close");
+    const form = document.getElementById("ww-chat-form");
+    const input = document.getElementById("ww-chat-input");
+    const messages = document.getElementById("ww-chat-messages");
+    const ticketPanel = document.getElementById("ww-ticket-form-panel");
+    const ticketToggle = document.getElementById("ww-chat-ticket-toggle");
+
+    // Session ID stored in localStorage
+    let sessionId = localStorage.getItem("ww_chat_session_id");
+    if (!sessionId) {
+        sessionId = "ww-" + Math.random().toString(36).substring(2, 10);
+        localStorage.setItem("ww_chat_session_id", sessionId);
+    }
+
+    // Toggle Chat Window
+    function toggleChat(open) {
+        if (open === undefined) {
+            windowEl.classList.toggle("ww-chat-hidden");
+        } else if (open) {
+            windowEl.classList.remove("ww-chat-hidden");
+        } else {
+            windowEl.classList.add("ww-chat-hidden");
+        }
+        if (!windowEl.classList.contains("ww-chat-hidden")) {
+            input.focus();
+            scrollBottom();
+        }
+    }
+
+    trigger.addEventListener("click", function() { toggleChat(); });
+    closeBtn.addEventListener("click", function() { toggleChat(false); });
+    ticketToggle.addEventListener("click", function() {
+        ticketPanel.classList.toggle("ww-ticket-hidden");
+        scrollBottom();
+    });
+
+    window.wwOpenTicketForm = function() {
+        ticketPanel.classList.remove("ww-ticket-hidden");
+        scrollBottom();
+    };
+
+    window.wwCloseTicketForm = function() {
+        ticketPanel.classList.add("ww-ticket-hidden");
+    };
+
+    // Global hook for error pages & other components
+    window.openWanderWiseChat = function(initialQuery) {
+        toggleChat(true);
+        if (initialQuery) {
+            wwSendQuick(initialQuery);
+        }
+    };
+
+    function scrollBottom() {
+        setTimeout(function() {
+            messages.scrollTop = messages.scrollHeight;
+        }, 50);
+    }
+
+    // Append user message
+    function appendUserMessage(text) {
+        const div = document.createElement("div");
+        div.className = "ww-msg ww-msg-user";
+        div.innerHTML = '<div class="ww-msg-content"><p>' + escapeHtml(text) + '</p></div>';
+        messages.appendChild(div);
+        scrollBottom();
+    }
+
+    // Append typing indicator
+    function showTyping() {
+        const div = document.createElement("div");
+        div.id = "ww-typing-indicator";
+        div.className = "ww-msg ww-msg-bot";
+        div.innerHTML = '<div class="ww-msg-avatar">🤖</div><div class="ww-msg-content ww-typing"><span></span><span></span><span></span></div>';
+        messages.appendChild(div);
+        scrollBottom();
+    }
+
+    function removeTyping() {
+        const el = document.getElementById("ww-typing-indicator");
+        if (el) el.remove();
+    }
+
+    // Append bot response with feedback & quick chips
+    function appendBotResponse(data) {
+        removeTyping();
+        const div = document.createElement("div");
+        div.className = "ww-msg ww-msg-bot";
+
+        // Convert simple markdown to HTML (headings, bold, lists, linebreaks)
+        let bodyHtml = formatMarkdown(data.reply || "");
+
+        // Build quick chips
+        let chipsHtml = "";
+        if (data.quick_replies && data.quick_replies.length > 0) {
+            chipsHtml += '<div class="ww-quick-chips">';
+            data.quick_replies.forEach(function(chip) {
+                if (chip === "🎫 Create Support Ticket" || chip.includes("ticket")) {
+                    chipsHtml += '<button type="button" class="ww-chip" onclick="wwOpenTicketForm()">🎫 Support Ticket</button>';
+                } else {
+                    chipsHtml += '<button type="button" class="ww-chip" onclick="wwSendQuick(\'' + escapeHtml(chip).replace(/'/g, "\\'") + '\')">' + escapeHtml(chip) + '</button>';
+                }
+            });
+            chipsHtml += '</div>';
+        }
+
+        // Support ticket button if suggested
+        if (data.suggest_ticket) {
+            chipsHtml += '<div style="margin-top:8px;"><button type="button" class="ww-btn-submit-ticket" style="width:auto;padding:6px 14px;" onclick="wwOpenTicketForm()">🎫 Fill Support Ticket Form →</button></div>';
+        }
+
+        // Feedback row (logged to MongoDB)
+        const msgId = "fb-" + Math.random().toString(36).substring(2, 8);
+        const feedbackHtml = '<div class="ww-feedback-row" id="' + msgId + '">' +
+            '<span>Was this helpful?</span>' +
+            '<button type="button" class="ww-fb-btn" onclick="wwSendFeedback(\'' + msgId + '\', 5)">👍 Yes</button>' +
+            '<button type="button" class="ww-fb-btn" onclick="wwSendFeedback(\'' + msgId + '\', 1)">👎 No</button>' +
+            '</div>';
+
+        div.innerHTML = '<div class="ww-msg-avatar">🤖</div><div class="ww-msg-content">' + bodyHtml + chipsHtml + feedbackHtml + '</div>';
+        messages.appendChild(div);
+        scrollBottom();
+    }
+
+    // Send query to /api/chat/
+    window.wwSendMessage = function(text) {
+        if (!text || !text.trim()) return;
+        const cleanText = text.trim();
+        appendUserMessage(cleanText);
+        showTyping();
+
+        fetch("/api/chat/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: cleanText, session_id: sessionId })
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            appendBotResponse(data);
+        })
+        .catch(function(err) {
+            removeTyping();
+            appendBotResponse({
+                reply: "⚠️ Unable to reach the assistant service at this moment. You can still create a support ticket or explore our FAQs.",
+                suggest_ticket: true
+            });
+        });
+    };
+
+    window.wwSendQuick = function(text) {
+        wwSendMessage(text);
+    };
+
+    window.wwHandleSubmit = function(e) {
+        e.preventDefault();
+        const text = input.value;
+        if (!text.trim()) return;
+        input.value = "";
+        wwSendMessage(text);
+    };
+
+    // Submit Support Ticket to SQL
+    window.wwSubmitTicket = function(e) {
+        e.preventDefault();
+        const submitBtn = document.getElementById("ww-tck-submit-btn");
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Submitting to SQL Database...";
+
+        const payload = {
+            name: document.getElementById("ww-tck-name").value,
+            email: document.getElementById("ww-tck-email").value,
+            category: document.getElementById("ww-tck-category").value,
+            subject: document.getElementById("ww-tck-subject").value,
+            message: document.getElementById("ww-tck-message").value
+        };
+
+        fetch("/api/support-ticket/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Submit Ticket to SQL Database →";
+            if (data.success) {
+                wwCloseTicketForm();
+                appendBotResponse({
+                    reply: "✅ **Support Ticket Created Successfully!**\n\n" +
+                           "• **Ticket ID:** `" + data.ticket_id + "` (Stored in SQL Database)\n" +
+                           "• **Time:** " + data.created_at + "\n" +
+                           "• Our travel engineering team will review your inquiry and follow up via email at **" + escapeHtml(payload.email) + "**.",
+                    quick_replies: ["Plan a trip", "Browse FAQs", "Health Check"]
+                });
+                document.getElementById("ww-ticket-form").reset();
+            } else {
+                alert("Error: " + (data.error || "Failed to submit ticket"));
+            }
+        })
+        .catch(function(err) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Submit Ticket to SQL Database →";
+            alert("Network error while submitting support ticket.");
+        });
+    };
+
+    // Submit Feedback to MongoDB
+    window.wwSendFeedback = function(rowId, rating) {
+        const row = document.getElementById(rowId);
+        if (!row) return;
+        row.innerHTML = '<span style="color:#6755e8;font-weight:600;">Thank you for your feedback! (Saved to MongoDB)</span>';
+
+        fetch("/api/feedback/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                session_id: sessionId,
+                rating: rating,
+                comment: rating === 5 ? "Positive" : "Needs improvement"
+            })
+        }).catch(function(err) {});
+    };
+
+    function escapeHtml(str) {
+        if (!str) return "";
+        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+
+    function formatMarkdown(text) {
+        let safe = escapeHtml(text);
+        // Headings
+        safe = safe.replace(/^### (.*$)/gim, '<h4 style="margin:4px 0 6px;color:#6755e8;">$1</h4>');
+        // Bold
+        safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        // Code
+        safe = safe.replace(/`(.*?)`/g, '<code style="background:#f1edff;padding:2px 5px;border-radius:4px;font-size:12px;color:#5541d4;">$1</code>');
+        // Bullet points
+        safe = safe.replace(/^\• (.*$)/gim, '<li>$1</li>');
+        safe = safe.replace(/^(?:1\.|2\.|3\.|4\.|5\.) (.*$)/gim, '<li>$1</li>');
+        // Wrap adjacent li in ul
+        safe = safe.replace(/(<li>.*<\/li>)/gs, '<ul style="margin:6px 0;padding-left:18px;">$1</ul>');
+        // Clean double breaks
+        safe = safe.replace(/\n\n/g, '<p style="margin:6px 0;"></p>');
+        safe = safe.replace(/\n/g, '<br>');
+        return safe;
+    }
+})();
+</script>

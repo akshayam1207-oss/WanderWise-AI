@@ -4,5 +4,7 @@ venv/
 .venv/
 .env
 .env.*
+!.env.example
 staticfiles/
 db.sqlite3
+data/

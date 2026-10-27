@@ -2,6 +2,19 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    # Pages
     path("", views.home, name="home"),
+    path("faq/", views.faq_page, name="faq"),
+    path("destinations/", views.destinations_page, name="destinations"),
     path("plan-trip/", views.plan_trip, name="plan_trip"),
+    path("health/", views.health_check, name="health"),
+    path("errors/", views.error_reference, name="errors"),
+    path("test-error/<int:code>/", views.test_error, name="test_error"),
+
+    # REST APIs
+    path("api/chat/", views.api_chat, name="api_chat"),
+    path("api/support-ticket/", views.api_support_ticket, name="api_support_ticket"),
+    path("api/feedback/", views.api_feedback, name="api_feedback"),
+    path("api/weather/", views.api_weather, name="api_weather"),
+    path("api/health/", views.health_check, name="api_health"),
 ]

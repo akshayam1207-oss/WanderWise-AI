@@ -1,0 +1,234 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }}</title>
+    <link rel="stylesheet" href="{% static 'myapp/style.css' %}">
+
+    <style>
+        .page-header {
+            background: linear-gradient(135deg, #10152c, #1f2852);
+            color: #ffffff;
+            padding: 70px 7% 60px;
+            text-align: center;
+        }
+        .page-header h1 {
+            font-size: clamp(32px, 4vw, 44px);
+            letter-spacing: -1px;
+            margin: 10px 0 14px;
+        }
+        .page-header p {
+            color: #b3b9d4;
+            max-width: 660px;
+            margin: 0 auto;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: -30px auto 80px;
+            padding: 0 20px;
+        }
+
+        .error-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+        .error-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 26px;
+            box-shadow: 0 10px 30px rgba(52, 58, 107, 0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .error-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+        }
+        .error-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .err-code-badge {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--primary);
+            background: #f1edff;
+            padding: 6px 14px;
+            border-radius: 10px;
+        }
+        .err-type-pill {
+            font-size: 11.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: #f0f1fa;
+            color: #666;
+        }
+        .site-specific-badge {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .error-card h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+        .error-card p {
+            font-size: 13.5px;
+            color: var(--muted);
+            line-height: 1.55;
+            margin-bottom: 14px;
+        }
+        .error-actions {
+            border-top: 1px dashed var(--border);
+            padding-top: 14px;
+            display: flex;
+            gap: 10px;
+        }
+        .btn-test-err {
+            flex: 1;
+            background: #f8f9ff;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 9px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .btn-test-err:hover {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+        .btn-ask-ai-err {
+            background: #6755e8;
+            color: #fff;
+            border: none;
+            padding: 9px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-ask-ai-err:hover {
+            background: #4e3bc5;
+        }
+
+        .custom-error-highlight {
+            background: linear-gradient(135deg, #201a45, #352373);
+            border-radius: 20px;
+            padding: 34px;
+            color: #fff;
+            margin-bottom: 40px;
+        }
+        .custom-error-highlight h2 { font-size: 24px; margin-bottom: 10px; }
+        .custom-error-highlight p { opacity: 0.9; font-size: 14.5px; line-height: 1.6; }
+        .code-snippet {
+            background: rgba(0, 0, 0, 0.35);
+            padding: 14px 18px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 13px;
+            margin: 14px 0;
+            display: block;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @media (max-width: 800px) {
+            .error-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <a href="/" class="logo">✈ WanderWise <span>AI</span></a>
+
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/destinations/">Destinations</a>
+            <a href="/faq/">FAQ</a>
+            <a href="/health/">System Health</a>
+            <a href="/errors/" style="color:var(--primary);font-weight:700;">Error Guide</a>
+        </div>
+
+        <a href="/#planner" class="nav-button">Plan a Trip ↗</a>
+    </nav>
+
+    <!-- Header Section -->
+    <header class="page-header">
+        <h1>Error Codes Reference &amp; Testing Center</h1>
+        <p>Comprehensive documentation and interactive simulation triggers for all 8 required application and HTTP error codes.</p>
+    </header>
+
+    <main class="container">
+        <!-- Site-Specific Code Deep Dive -->
+        <div class="custom-error-highlight">
+            <h2>⭐ Site-Specific Code: WW-600 (HTTP 600)</h2>
+            <p>
+                <strong>Meaning:</strong> WanderWise AI Travel Plan Generation Quota Exceeded / AI Destination Planner Timeout.<br>
+                This site-specific error code is unique to WanderWise AI. It is triggered when an itinerary request exceeds safe duration limits (> 30 days) or when multi-city constraints overwhelm real-time route optimization algorithms.
+            </p>
+            <div class="code-snippet">
+                HTTP Status: 600 WW_PLAN_GENERATION_LIMIT_EXCEEDED<br>
+                Payload: {"code": "WW-600", "error": "AI Itinerary Duration Exceeded", "max_days": 30}
+            </div>
+            <div style="display:flex;gap:12px;margin-top:16px;">
+                <a href="/test-error/600/" class="btn-ask-ai-err" style="background:#fff;color:#6755e8;">🧪 Test Simulate Error WW-600</a>
+                <button type="button" class="btn-ask-ai-err" onclick="openWanderWiseChat('What does error WW-600 mean in WanderWise?')">💬 Ask AI to Explain WW-600</button>
+            </div>
+        </div>
+
+        <!-- 8 Required Error Codes Grid -->
+        <div class="error-grid">
+            {% for err in error_codes %}
+            <article class="error-card">
+                <div>
+                    <div class="error-top">
+                        <span class="err-code-badge">{{ err.code }}</span>
+                        <span class="err-type-pill {% if err.code == 600 %}site-specific-badge{% endif %}">{{ err.type }}</span>
+                    </div>
+                    <h3>{{ err.name }}</h3>
+                    <p>{{ err.desc }}</p>
+                </div>
+                <div class="error-actions">
+                    <a href="/test-error/{{ err.code }}/" class="btn-test-err" target="_blank">
+                        🧪 Test Simulate {{ err.code }} ↗
+                    </a>
+                    <button type="button" class="btn-ask-ai-err" onclick="openWanderWiseChat('Explain Error {{ err.code }}')">
+                        💬 Ask AI
+                    </button>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <a href="/" class="logo">✈ WanderWise <span>AI</span></a>
+        <p>Explore more. Worry less. Travel smarter.</p>
+        <small>© 2026 WanderWise AI · Complete Error Handling &amp; Support.</small>
+    </footer>
+
+    <!-- Chat Widget (Included on Every Page) -->
+    {% include "myapp/chat_widget.html" %}
+
+</body>
+</html>

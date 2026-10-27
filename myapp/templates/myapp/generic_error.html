@@ -1,0 +1,148 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error {{ status_code }} | WanderWise AI</title>
+    <link rel="stylesheet" href="{% static 'myapp/style.css' %}">
+
+    <style>
+        .error-page-wrapper {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+        .error-box {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 26px;
+            padding: 50px 40px;
+            max-width: 660px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(103, 85, 232, 0.12);
+        }
+        .error-code-badge {
+            font-size: 70px;
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: -2px;
+            background: linear-gradient(135deg, #6755e8, #3a7bd5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+        }
+        .site-specific-badge {
+            display: inline-block;
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fca5a5;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+        .error-box h1 {
+            font-size: 24px;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+        .error-box p {
+            color: var(--muted);
+            font-size: 14.5px;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+        .error-details-box {
+            background: #f8f9ff;
+            border: 1px solid #e0e2ed;
+            border-radius: 14px;
+            padding: 16px 20px;
+            text-align: left;
+            font-size: 13.5px;
+            margin-bottom: 24px;
+        }
+        .error-details-box strong { color: var(--text); }
+
+        .error-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .btn-assistant {
+            background: linear-gradient(135deg, #6755e8, #4e3bc5);
+            color: #ffffff;
+            border: none;
+            padding: 13px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(103, 85, 232, 0.35);
+            transition: transform 0.2s;
+        }
+        .btn-assistant:hover { transform: translateY(-2px); }
+        .btn-home {
+            background: #ffffff;
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 13px 22px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/" class="logo">✈ WanderWise <span>AI</span></a>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/destinations/">Destinations</a>
+            <a href="/faq/">FAQ</a>
+            <a href="/health/">System Health</a>
+            <a href="/errors/">Error Guide</a>
+        </div>
+        <a href="/#planner" class="nav-button">Plan a Trip ↗</a>
+    </nav>
+
+    <div class="error-page-wrapper">
+        <div class="error-box">
+            <div class="error-code-badge">
+                {% if is_site_specific %}WW-600{% else %}{{ status_code }}{% endif %}
+            </div>
+
+            {% if is_site_specific %}
+                <span class="site-specific-badge">⭐ Site-Specific Custom Error Code</span>
+            {% endif %}
+
+            <h1>{{ error.title|default:"Error Occurred" }}</h1>
+            <p>{{ custom_message|default:error.meaning }}</p>
+
+            <div class="error-details-box">
+                <div style="margin-bottom:8px;"><strong>Category:</strong> {{ error.category }}</div>
+                <div style="margin-bottom:8px;"><strong>In WanderWise:</strong> {{ error.wanderwise_context }}</div>
+                <div><strong>Resolution:</strong> {{ error.solution|linebreaksbr }}</div>
+            </div>
+
+            <div class="error-actions">
+                <!-- Assessment Requirement: Ask the Assistant option -->
+                <button type="button" class="btn-assistant" onclick="openWanderWiseChat('Explain Error {% if is_site_specific %}WW-600{% else %}{{ status_code }}{% endif %}')">
+                    💬 Ask the Assistant for Help
+                </button>
+                <a href="/" class="btn-home">← Back to Home</a>
+                <a href="/errors/" class="btn-home">View All 8 Error Codes</a>
+            </div>
+        </div>
+    </div>
+
+    {% include "myapp/chat_widget.html" %}
+
+</body>
+</html>

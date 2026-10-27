@@ -132,11 +132,13 @@
         <a href="/" class="logo">✈ WanderWise <span>AI</span></a>
 
         <div class="nav-links">
-            <a href="#home">Home</a>
-            <a href="#how">How it works</a>
-            <a href="#planner">Plan a Trip</a>
-            <a href="#destinations">Destinations</a>
-            <a href="#faq">FAQ</a>
+            <a href="/">Home</a>
+            <a href="/#how">How it works</a>
+            <a href="/#planner">Plan a Trip</a>
+            <a href="/destinations/">Destinations</a>
+            <a href="/faq/">FAQ</a>
+            <a href="/health/">System Health</a>
+            <a href="/errors/">Error Guide</a>
         </div>
 
         <a href="#planner" class="nav-button">Start Planning ↗</a>
@@ -473,22 +475,21 @@
         </div>
 
         <div class="faq">
-            <details class="reveal">
-                <summary>Is WanderWise AI free to use?</summary>
-                <p>Yes. Enter your trip details and get a full plan with no sign-up.</p>
-            </details>
-            <details class="reveal">
-                <summary>Are the budget numbers exact?</summary>
-                <p>No. They are estimates based on your travel mode and stay style. Always check current prices before booking.</p>
-            </details>
-            <details class="reveal">
-                <summary>Can I plan a trip to any place?</summary>
-                <p>Yes. Popular places like Ooty, Manali, Goa, Bali, Munnar and Jaipur have curated attractions. Other places get general suggestions you can open in Google Maps.</p>
-            </details>
-            <details class="reveal">
-                <summary>Can I save my itinerary?</summary>
-                <p>Use the Print / Save as PDF button or the Copy itinerary button on your results page.</p>
-            </details>
+            {% if faqs %}
+                {% for faq in faqs %}
+                <details class="reveal">
+                    <summary>{{ faq.question }}</summary>
+                    <p>{{ faq.answer }}</p>
+                </details>
+                {% endfor %}
+            {% else %}
+                <p style="text-align:center;color:var(--muted);">No FAQs currently in database.</p>
+            {% endif %}
+        </div>
+        <div style="text-align:center;margin-top:28px;">
+            <a href="/faq/" class="primary-button" style="display:inline-block;padding:11px 22px;font-size:13.5px;">
+                Explore All 10+ FAQs &amp; Categories in SQL Database →
+            </a>
         </div>
     </section>
 
@@ -663,5 +664,6 @@
         });
     </script>
 
+{% include "myapp/chat_widget.html" %}
 </body>
 </html>

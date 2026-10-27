@@ -1,0 +1,291 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }}</title>
+    <link rel="stylesheet" href="{% static 'myapp/style.css' %}">
+
+    <style>
+        .page-header {
+            background: linear-gradient(135deg, #10152c, #1f2852);
+            color: #ffffff;
+            padding: 70px 7% 60px;
+            text-align: center;
+        }
+        .page-header h1 {
+            font-size: clamp(32px, 4vw, 44px);
+            letter-spacing: -1px;
+            margin: 10px 0 14px;
+        }
+        .page-header p {
+            color: #b3b9d4;
+            max-width: 600px;
+            margin: 0 auto 24px;
+            font-size: 16px;
+        }
+        .faq-stats-badge {
+            display: inline-block;
+            background: rgba(103, 85, 232, 0.25);
+            border: 1px solid rgba(103, 85, 232, 0.45);
+            color: #c4b5fd;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .faq-container {
+            max-width: 900px;
+            margin: -30px auto 80px;
+            padding: 0 20px;
+        }
+
+        .faq-search-card {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 24px 30px;
+            box-shadow: 0 16px 45px rgba(52, 58, 107, 0.08);
+            border: 1px solid var(--border);
+            margin-bottom: 30px;
+        }
+        .faq-search-form {
+            display: flex;
+            gap: 12px;
+        }
+        .faq-search-input {
+            flex: 1;
+            padding: 14px 20px;
+            border: 1px solid #dcdde8;
+            border-radius: 12px;
+            font-size: 15px;
+            outline: none;
+        }
+        .faq-search-input:focus { border-color: var(--primary); }
+        .faq-search-btn {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .category-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+        }
+        .cat-chip {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: #f8f9ff;
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .cat-chip:hover, .cat-chip.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        .faq-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .faq-item {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 22px 26px;
+            box-shadow: 0 8px 30px rgba(52, 58, 107, 0.04);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .faq-item[open] {
+            border-color: var(--primary);
+            box-shadow: 0 12px 38px rgba(103, 85, 232, 0.12);
+        }
+        .faq-item summary {
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 16.5px;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .faq-item summary::-webkit-details-marker { display: none; }
+        .faq-q-text {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .faq-badge {
+            font-size: 11px;
+            padding: 3px 9px;
+            border-radius: 12px;
+            background: #ece8ff;
+            color: var(--primary);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .faq-toggle-icon {
+            font-size: 22px;
+            color: var(--primary);
+            font-weight: 400;
+            line-height: 1;
+        }
+        .faq-item[open] .faq-toggle-icon { transform: rotate(45deg); display: inline-block; }
+        .faq-item-body {
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px dashed var(--border);
+            color: var(--muted);
+            font-size: 14.5px;
+            line-height: 1.65;
+        }
+        .faq-actions {
+            margin-top: 14px;
+            display: flex;
+            gap: 10px;
+        }
+        .btn-ask-ai-faq {
+            background: #f1edff;
+            color: var(--primary);
+            border: 1px solid #ddd6fe;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-ask-ai-faq:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .support-banner {
+            background: linear-gradient(135deg, #6755e8, #3a7bd5);
+            border-radius: 20px;
+            padding: 40px 30px;
+            color: #fff;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .support-banner h3 { font-size: 24px; margin-bottom: 8px; }
+        .support-banner p { opacity: 0.9; margin-bottom: 20px; font-size: 14px; }
+        .btn-banner-chat {
+            background: #ffffff;
+            color: var(--primary);
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <a href="/" class="logo">✈ WanderWise <span>AI</span></a>
+
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/destinations/">Destinations</a>
+            <a href="/faq/" style="color:var(--primary);font-weight:700;">FAQ</a>
+            <a href="/health/">System Health</a>
+            <a href="/errors/">Error Guide</a>
+        </div>
+
+        <a href="/#planner" class="nav-button">Plan a Trip ↗</a>
+    </nav>
+
+    <!-- Header Section -->
+    <header class="page-header">
+        <span class="faq-stats-badge">🗄️ SQL Database Knowledge Base · {{ faq_count }} Questions Stored</span>
+        <h1>Frequently Asked Questions</h1>
+        <p>Everything you need to know about WanderWise AI travel planning, budget estimates, food preferences, and troubleshooting.</p>
+    </header>
+
+    <!-- Main FAQ Content -->
+    <main class="faq-container">
+        <!-- Search and Category Filters -->
+        <div class="faq-search-card">
+            <form method="GET" action="{% url 'faq' %}" class="faq-search-form">
+                <input type="text" name="q" class="faq-search-input" value="{{ search_query }}" placeholder="Search FAQs (e.g., budget, save itinerary, food, error 404)...">
+                <button type="submit" class="faq-search-btn">Search FAQs</button>
+            </form>
+
+            <div class="category-chips">
+                {% for cat in categories %}
+                <a href="{% url 'faq' %}?category={{ cat }}" class="cat-chip {% if active_category == cat %}active{% endif %}">
+                    {{ cat }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- FAQ Accordion List -->
+        <div class="faq-list">
+            {% if faqs %}
+                {% for faq in faqs %}
+                <details class="faq-item" {% if forloop.first %}open{% endif %}>
+                    <summary>
+                        <div class="faq-q-text">
+                            <span class="faq-badge">{{ faq.category }}</span>
+                            <span>{{ faq.question }}</span>
+                        </div>
+                        <span class="faq-toggle-icon">+</span>
+                    </summary>
+                    <div class="faq-item-body">
+                        <p>{{ faq.answer }}</p>
+                        <div class="faq-actions">
+                            <button type="button" class="btn-ask-ai-faq" onclick="openWanderWiseChat('{{ faq.question|escapejs }}')">
+                                💬 Ask AI about this
+                            </button>
+                        </div>
+                    </div>
+                </details>
+                {% endfor %}
+            {% else %}
+                <div style="background:#fff;border-radius:16px;padding:40px;text-align:center;border:1px solid var(--border);">
+                    <h3>No FAQs matched your query "{{ search_query }}"</h3>
+                    <p style="color:var(--muted);margin:8px 0 16px;">Try searching with another keyword or ask our AI assistant directly.</p>
+                    <a href="{% url 'faq' %}" class="nav-button">View All FAQs</a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Support Banner -->
+        <div class="support-banner">
+            <h3>Didn't find your answer?</h3>
+            <p>Our WanderWise AI Assistant is available 24/7 on every page to answer your travel queries and explain error codes.</p>
+            <button type="button" class="btn-banner-chat" onclick="openWanderWiseChat('How do I contact support?')">
+                💬 Open AI Assistant &amp; Support Ticket →
+            </button>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <a href="/" class="logo">✈ WanderWise <span>AI</span></a>
+        <p>Explore more. Worry less. Travel smarter.</p>
+        <small>© 2026 WanderWise AI · Stored in SQL Database · AI Powered.</small>
+    </footer>
+
+    <!-- Chat Widget (Included on Every Page) -->
+    {% include "myapp/chat_widget.html" %}
+
+</body>
+</html>

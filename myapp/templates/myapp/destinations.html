@@ -1,0 +1,304 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }}</title>
+    <link rel="stylesheet" href="{% static 'myapp/style.css' %}">
+
+    <style>
+        .page-header {
+            background: linear-gradient(135deg, #10152c, #1f2852);
+            color: #ffffff;
+            padding: 70px 7% 60px;
+            text-align: center;
+        }
+        .page-header h1 {
+            font-size: clamp(32px, 4vw, 44px);
+            letter-spacing: -1px;
+            margin: 10px 0 14px;
+        }
+        .page-header p {
+            color: #b3b9d4;
+            max-width: 660px;
+            margin: 0 auto 24px;
+            font-size: 16px;
+        }
+
+        .api-demo-box {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 24px 30px;
+            max-width: 1100px;
+            margin: -35px auto 40px;
+            box-shadow: 0 16px 45px rgba(52, 58, 107, 0.08);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .api-demo-text h4 { font-size: 16px; margin-bottom: 4px; color: var(--primary); }
+        .api-demo-text p { font-size: 13px; color: var(--muted); margin: 0; }
+        .btn-test-timeout {
+            background: #f1edff;
+            color: var(--primary);
+            border: 1px solid #c4b5fd;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-test-timeout:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .dest-grid {
+            max-width: 1100px;
+            margin: 0 auto 80px;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 26px;
+        }
+        .dest-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 12px 36px rgba(52, 58, 107, 0.06);
+            transition: transform 0.25s, box-shadow 0.25s;
+            display: flex;
+            flex-direction: column;
+        }
+        .dest-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 18px 48px rgba(103, 85, 232, 0.16);
+        }
+        .dest-card-header {
+            padding: 30px 24px 20px;
+            color: #ffffff;
+            position: relative;
+        }
+        .dest-card-header span {
+            font-size: 11.5px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            opacity: 0.9;
+        }
+        .dest-card-header h3 {
+            font-size: 24px;
+            margin: 6px 0 2px;
+        }
+        .dest-card-header small {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .dest-card-body {
+            padding: 22px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Weather Badge (Third Party API with Timeout Fallback) */
+        .weather-badge {
+            background: #f8f9ff;
+            border: 1px solid #ebebf5;
+            border-radius: 14px;
+            padding: 12px 14px;
+            margin-bottom: 16px;
+            font-size: 13px;
+        }
+        .weather-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .weather-temp {
+            font-size: 18px;
+            color: var(--primary);
+        }
+        .weather-source {
+            font-size: 10.5px;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .badge-live {
+            color: #16a34a;
+            font-weight: 700;
+        }
+        .badge-fallback {
+            color: #d97706;
+            font-weight: 700;
+        }
+
+        .dest-advisory {
+            font-size: 12.5px;
+            color: var(--muted);
+            margin-bottom: 18px;
+            line-height: 1.5;
+        }
+
+        .dest-card-footer {
+            display: flex;
+            gap: 8px;
+        }
+        .btn-plan-dest {
+            flex: 1;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 11px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 13px;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-plan-dest:hover {
+            background: var(--primary-dark);
+        }
+        .btn-ask-dest {
+            background: #f1edff;
+            color: var(--primary);
+            border: 1px solid #ddd6fe;
+            padding: 11px 14px;
+            border-radius: 10px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .btn-ask-dest:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        @media (max-width: 900px) {
+            .dest-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (max-width: 600px) {
+            .dest-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <a href="/" class="logo">✈ WanderWise <span>AI</span></a>
+
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/destinations/" style="color:var(--primary);font-weight:700;">Destinations</a>
+            <a href="/faq/">FAQ</a>
+            <a href="/health/">System Health</a>
+            <a href="/errors/">Error Guide</a>
+        </div>
+
+        <a href="/#planner" class="nav-button">Plan a Trip ↗</a>
+    </nav>
+
+    <!-- Header Section -->
+    <header class="page-header">
+        <span class="faq-stats-badge">🌐 Live Meteorological Third-Party API · SLA Timeout &amp; Fallback Protected</span>
+        <h1>Curated Travel Destinations</h1>
+        <p>Explore hand-picked destinations across mountains, beaches, and cultural heritage centers with live climate feeds.</p>
+    </header>
+
+    <main>
+        <!-- Third-Party API Demonstration Callout -->
+        <div class="api-demo-box">
+            <div class="api-demo-text">
+                <h4>🌦️ Third-Party API Integration: Open-Meteo Meteorological Service</h4>
+                <p>Every destination features live weather data retrieved with a strict <strong>3.0-second timeout</strong>. If the external network times out or fails, WanderWise automatically switches to its local climate fallback engine without interrupting the user experience.</p>
+            </div>
+            <button type="button" class="btn-test-timeout" onclick="testApiTimeoutFallback()">
+                🧪 Test Timeout Fallback (3.0s SLA)
+            </button>
+        </div>
+
+        <!-- Destinations Grid -->
+        <div class="dest-grid">
+            {% for d in destinations %}
+            <article class="dest-card">
+                <div class="dest-card-header" style="background: {{ d.gradient }};">
+                    <span>{{ d.tag }}</span>
+                    <h3>{{ d.name }}</h3>
+                    <small>📍 {{ d.state }}</small>
+                </div>
+
+                <div class="dest-card-body">
+                    <!-- Live Weather / Fallback Badge -->
+                    <div class="weather-badge">
+                        <div class="weather-top">
+                            <span>{{ d.weather.condition }}</span>
+                            <span class="weather-temp">{{ d.weather.temperature }}°C</span>
+                        </div>
+                        <div class="weather-source">
+                            {% if d.weather.is_fallback %}
+                                <span class="badge-fallback">● Fallback Engine Active:</span> {{ d.weather.source }}
+                            {% else %}
+                                <span class="badge-live">● Live Feed:</span> {{ d.weather.source }}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <p class="dest-advisory">💡 <strong>Travel Tip:</strong> {{ d.weather.advisory }}</p>
+
+                    <div class="dest-card-footer">
+                        <a href="/?dest={{ d.name }}#planner" class="btn-plan-dest">
+                            Plan {{ d.name }} Trip →
+                        </a>
+                        <button type="button" class="btn-ask-dest" title="Ask AI about {{ d.name }}" onclick="openWanderWiseChat('Tell me about planning a trip to {{ d.name }}')">
+                            💬
+                        </button>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <a href="/" class="logo">✈ WanderWise <span>AI</span></a>
+        <p>Explore more. Worry less. Travel smarter.</p>
+        <small>© 2026 WanderWise AI · Connected to Live APIs with Timeout Fallback.</small>
+    </footer>
+
+    <!-- Chat Widget (Included on Every Page) -->
+    {% include "myapp/chat_widget.html" %}
+
+    <script>
+    function testApiTimeoutFallback() {
+        alert("Simulating 3.0-second external third-party API timeout test...");
+        fetch("/api/weather/?destination=Ooty&force_timeout=true")
+            .then(res => res.json())
+            .then(data => {
+                alert(
+                    "✅ Fallback Activated Successfully!\n\n" +
+                    "• Status: " + (data.is_fallback ? "Fallback Active" : "Live") + "\n" +
+                    "• Reason: " + data.fallback_reason + "\n" +
+                    "• Source: " + data.source + "\n" +
+                    "• Destination: " + data.destination + " (" + data.temperature + "°C, " + data.condition + ")\n" +
+                    "• Response Time: " + data.response_time_ms + "ms\n\n" +
+                    "The application responded safely without crashing or throwing a 500 error!"
+                );
+            });
+    }
+    </script>
+</body>
+</html>
