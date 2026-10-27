@@ -1,0 +1,667 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>WanderWise AI | Smart Travel Planner</title>
+
+    <link rel="stylesheet" href="{% static 'myapp/style.css' %}">
+
+    <script>document.documentElement.classList.add("js");</script>
+
+    <style>
+        /* ---------- Sticky nav ---------- */
+        .navbar { position: sticky; top: 0; z-index: 50; transition: box-shadow .3s; }
+        .navbar.scrolled { box-shadow: 0 6px 24px #343a6b18; }
+
+        /* ---------- Scroll reveal ---------- */
+        .js .reveal { opacity: 0; transform: translateY(34px); transition: opacity .7s ease, transform .7s ease; }
+        .js .reveal.visible { opacity: 1; transform: none; }
+        .js .reveal.d1 { transition-delay: .12s; }
+        .js .reveal.d2 { transition-delay: .24s; }
+        .js .reveal.d3 { transition-delay: .36s; }
+
+        /* ---------- Hero slideshow ---------- */
+        .hero-slide {
+            position: absolute; inset: 0; opacity: 0; transition: opacity 1.2s ease;
+            background-size: cover; background-position: center;
+        }
+        .hero-slide.active { opacity: 1; }
+        .hero-image .image-label { z-index: 2; }
+        .hero-dots { position: absolute; top: 20px; right: 22px; display: flex; gap: 7px; z-index: 2; }
+        .hero-dots span { width: 8px; height: 8px; border-radius: 50%; background: #ffffff88; transition: .3s; }
+        .hero-dots span.on { background: #fff; width: 22px; border-radius: 10px; }
+
+        /* ---------- Generic section helpers ---------- */
+        .block { padding: 80px 7%; }
+        .block.alt { background: #fff; }
+        .center-heading { text-align: center; max-width: 640px; margin: 0 auto 42px; }
+        .center-heading h2 { font-size: clamp(28px, 3vw, 38px); letter-spacing: -1px; margin: 8px 0; }
+        .center-heading p { color: var(--muted); font-size: 14px; }
+
+        /* ---------- How it works ---------- */
+        .steps-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; max-width: 1050px; margin: 0 auto; }
+        .step-card { background: #fff; border: 1px solid var(--border); border-radius: 20px; padding: 32px 26px; text-align: center; box-shadow: 0 12px 45px #343a6b0c; transition: transform .25s; }
+        .step-card:hover { transform: translateY(-6px); }
+        .step-num { width: 54px; height: 54px; margin: 0 auto 16px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; background: linear-gradient(135deg, #e5e1ff, #dff1ff); }
+        .step-card h3 { font-size: 17px; margin-bottom: 8px; }
+        .step-card p { color: var(--muted); font-size: 13px; }
+
+        /* ---------- Feature grid ---------- */
+        .feature-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; max-width: 1100px; margin: 0 auto; }
+        .feature { background: #f8f9ff; border: 1px solid var(--border); border-radius: 18px; padding: 26px; transition: .25s; }
+        .feature:hover { background: #fff; box-shadow: 0 14px 40px #6755e822; transform: translateY(-4px); }
+        .feature .ic { font-size: 28px; margin-bottom: 12px; }
+        .feature h3 { font-size: 16px; margin-bottom: 6px; }
+        .feature p { color: var(--muted); font-size: 13px; }
+
+        /* ---------- More destinations ---------- */
+        .mini-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 22px; }
+        .mini-card { position: relative; overflow: hidden; border-radius: 18px; padding: 26px; min-height: 150px; color: #fff; display: flex; flex-direction: column; justify-content: flex-end; transition: transform .25s; cursor: pointer; border: none; text-align: left; }
+        .mini-card:hover { transform: translateY(-5px) scale(1.01); }
+        .mini-card .big { position: absolute; top: 14px; right: 18px; font-size: 44px; opacity: .9; }
+        .mini-card h3 { font-size: 20px; }
+        .mini-card small { font-size: 12px; opacity: .92; }
+        .g1 { background: linear-gradient(135deg, #00b4db, #0083b0); }
+        .g2 { background: linear-gradient(135deg, #11998e, #38ef7d); }
+        .g3 { background: linear-gradient(135deg, #f7971e, #ffd200); color: #3a2c00; }
+        .g4 { background: linear-gradient(135deg, #3a7bd5, #6755e8); }
+        .g5 { background: linear-gradient(135deg, #ee0979, #ff6a00); }
+        .g6 { background: linear-gradient(135deg, #134e5e, #71b280); }
+        .sub-title { max-width: 1100px; margin: 54px auto 0; font-size: 20px; }
+
+        /* ---------- FAQ ---------- */
+        .faq { max-width: 760px; margin: 0 auto; }
+        .faq details { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 18px 22px; margin-bottom: 12px; transition: .2s; }
+        .faq details[open] { border-color: var(--primary); box-shadow: 0 10px 30px #6755e81a; }
+        .faq summary { cursor: pointer; font-weight: 700; font-size: 15px; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+        .faq summary::-webkit-details-marker { display: none; }
+        .faq summary::after { content: "+"; color: var(--primary); font-size: 20px; line-height: 1; }
+        .faq details[open] summary::after { content: "–"; }
+        .faq p { margin-top: 12px; color: var(--muted); font-size: 14px; }
+
+        /* ---------- Call to action ---------- */
+        .cta { margin: 0 7% 80px; border-radius: 26px; padding: 60px 30px; text-align: center; color: #fff; background: linear-gradient(135deg, #6755e8, #3a7bd5); }
+        .cta h2 { font-size: clamp(26px, 3vw, 36px); letter-spacing: -1px; margin-bottom: 10px; }
+        .cta p { opacity: .9; margin-bottom: 24px; }
+        .cta a { display: inline-block; background: #fff; color: var(--primary); padding: 14px 26px; border-radius: 11px; font-weight: 700; transition: .2s; }
+        .cta a:hover { transform: translateY(-2px); }
+
+        /* ---------- Back to top ---------- */
+        #toTop { position: fixed; right: 22px; bottom: 22px; width: 46px; height: 46px; border-radius: 50%; border: none; background: var(--primary); color: #fff; font-size: 20px; box-shadow: 0 8px 20px #6755e855; opacity: 0; pointer-events: none; transition: .3s; z-index: 60; }
+        #toTop.show { opacity: 1; pointer-events: auto; }
+
+        @media (max-width: 900px) {
+            .steps-grid, .feature-grid, .mini-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .block { padding: 60px 5%; }
+        }
+        @media (max-width: 650px) {
+            .steps-grid, .feature-grid, .mini-grid { grid-template-columns: 1fr; }
+            .cta { margin: 0 5% 60px; }
+        }
+
+        /* ---------- Planning roadmap overlay ---------- */
+        .roadmap-overlay { position: fixed; inset: 0; z-index: 999; display: none; align-items: center; justify-content: center; padding: 20px; background: linear-gradient(135deg, #f0efff, #fbfaff 60%, #edf8ff); }
+        .roadmap-overlay.show { display: flex; animation: fadeIn .4s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .roadmap-box { width: 100%; max-width: 520px; background: white; border: 1px solid var(--border); border-radius: 22px; padding: 38px 34px; box-shadow: 0 20px 60px #303b6620; }
+        .roadmap-box h2 { font-size: 26px; letter-spacing: -0.5px; margin: 8px 0 26px; }
+        .roadmap { list-style: none; position: relative; }
+        .roadmap::before { content: ""; position: absolute; left: 15px; top: 16px; bottom: 16px; width: 2px; background: var(--border); }
+        .roadmap li { position: relative; display: flex; align-items: center; gap: 16px; padding: 10px 0; opacity: 0.4; transition: opacity 0.3s; }
+        .roadmap li strong { display: block; font-size: 14px; }
+        .roadmap li small { color: var(--muted); font-size: 12px; }
+        .roadmap .dot { position: relative; z-index: 1; flex-shrink: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #fff; border: 2px solid var(--border); font-size: 13px; font-weight: 700; color: var(--muted); transition: 0.3s; }
+        .roadmap li.active { opacity: 1; }
+        .roadmap li.active .dot { border-color: var(--primary); color: var(--primary); box-shadow: 0 0 0 6px #6755e822; }
+        .roadmap li.done { opacity: 1; }
+        .roadmap li.done .dot { background: var(--primary); border-color: var(--primary); color: white; font-size: 0; }
+        .roadmap li.done .dot::after { content: "✓"; font-size: 15px; }
+        .roadmap-bar { height: 6px; margin-top: 26px; border-radius: 10px; background: #ececf7; overflow: hidden; }
+        #roadmapFill { height: 100%; width: 0; border-radius: 10px; background: linear-gradient(90deg, var(--primary), #4aa3ff); transition: width 0.8s ease; }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar" id="navbar">
+        <a href="/" class="logo">✈ WanderWise <span>AI</span></a>
+
+        <div class="nav-links">
+            <a href="#home">Home</a>
+            <a href="#how">How it works</a>
+            <a href="#planner">Plan a Trip</a>
+            <a href="#destinations">Destinations</a>
+            <a href="#faq">FAQ</a>
+        </div>
+
+        <a href="#planner" class="nav-button">Start Planning ↗</a>
+    </nav>
+
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+
+        <div class="hero-content">
+
+            <span class="badge">✦ YOUR PERSONAL AI TRAVEL COMPANION</span>
+
+            <h1>
+                Your next adventure,
+                <span>designed by AI.</span>
+            </h1>
+
+            <p>
+                Discover beautiful places, plan unforgettable journeys,
+                and create your perfect itinerary in seconds.
+            </p>
+
+            <a href="#planner" class="primary-button">
+                Plan My Journey →
+            </a>
+
+            <div class="hero-stats">
+                <div>
+                    <strong>AI Powered</strong>
+                    <small>Smart itineraries</small>
+                </div>
+
+                <div>
+                    <strong>Your Budget</strong>
+                    <small>Your adventure</small>
+                </div>
+
+                <div>
+                    <strong>Personalized</strong>
+                    <small>Made for you</small>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="hero-image">
+            <div class="hero-slide active" style="background-image: linear-gradient(to top, #10152cbb, transparent 65%), url('https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=1200&q=85');"></div>
+            <div class="hero-slide" style="background-image: linear-gradient(to top, #10152cbb, transparent 65%), url('https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1200&q=85');"></div>
+            <div class="hero-slide" style="background-image: linear-gradient(to top, #10152cbb, transparent 65%), url('https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=1200&q=85');"></div>
+            <div class="hero-slide" style="background-image: linear-gradient(to top, #10152cbb, transparent 65%), url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=85');"></div>
+
+            <div class="hero-dots" id="heroDots"><span class="on"></span><span></span><span></span><span></span></div>
+
+            <div class="image-label">
+                <span id="slideTag">✦ DESTINATION INSPIRATION</span>
+                <h3 id="slideTitle">Find your happy place.</h3>
+                <p id="slideText">Adventure is waiting for you.</p>
+            </div>
+        </div>
+
+    </section>
+
+
+    <!-- How it works -->
+    <section class="block" id="how">
+        <div class="center-heading reveal">
+            <span class="eyebrow">SIMPLE &amp; FAST</span>
+            <h2>How WanderWise works</h2>
+            <p>Three easy steps from "I want to travel" to a full plan.</p>
+        </div>
+
+        <div class="steps-grid">
+            <div class="step-card reveal">
+                <div class="step-num">📝</div>
+                <h3>1. Tell us your trip</h3>
+                <p>Enter your destination, budget, dates, travel mode and interests.</p>
+            </div>
+            <div class="step-card reveal d1">
+                <div class="step-num">🤖</div>
+                <h3>2. We build your plan</h3>
+                <p>Get a day-by-day itinerary with places to visit, food ideas and evening activities.</p>
+            </div>
+            <div class="step-card reveal d2">
+                <div class="step-num">🎒</div>
+                <h3>3. Pack and go</h3>
+                <p>Use the budget breakdown, packing checklist and map links, then print or copy your plan.</p>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Trip Planner -->
+    <section class="planner-section" id="planner" style="background:#fff;">
+
+        <div class="section-heading reveal">
+            <span class="eyebrow">YOUR JOURNEY STARTS HERE</span>
+
+            <h2>Plan your perfect getaway</h2>
+
+            <p>Tell us what you love. Let AI help plan the rest.</p>
+        </div>
+
+        <form class="planner-form reveal" method="POST" action="{% url 'plan_trip' %}">
+            {% csrf_token %}
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label for="destination">📍 Where do you want to go?</label>
+
+                    <input
+                        type="text"
+                        id="destination"
+                        name="destination"
+                        placeholder="e.g. Ooty, Manali, Goa"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="budget">💰 Your total budget (₹)</label>
+
+                    <input
+                        type="number"
+                        id="budget"
+                        name="budget"
+                        min="1"
+                        placeholder="e.g. 10000"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="start_date">🗓️ Start date (optional)</label>
+                    <input type="date" id="start_date" name="start_date">
+                </div>
+
+                <div class="form-group">
+                    <label for="duration">📅 Trip duration</label>
+
+                    <select id="duration" name="duration" required>
+                        <option value="1">1 day</option>
+                        <option value="2">2 days</option>
+                        <option value="3" selected>3 days</option>
+                        <option value="4">4 days</option>
+                        <option value="5">5 days</option>
+                        <option value="7">7 days</option>
+                        <option value="10">10 days</option>
+                        <option value="14">14 days</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="travelers">👥 Number of travelers</label>
+
+                    <select id="travelers" name="travelers" required>
+                        <option value="1">1 traveler</option>
+                        <option value="2" selected>2 travelers</option>
+                        <option value="3">3 travelers</option>
+                        <option value="4">4 travelers</option>
+                        <option value="5">5 travelers</option>
+                        <option value="6">6 travelers</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="travel_mode">🚗 How will you travel?</label>
+                    <select id="travel_mode" name="travel_mode">
+                        <option value="bus">🚌 Bus</option>
+                        <option value="train" selected>🚆 Train</option>
+                        <option value="car">🚗 Car / Cab</option>
+                        <option value="flight">✈️ Flight</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="stay_style">🏨 Stay style</label>
+                    <select id="stay_style" name="stay_style">
+                        <option value="budget">Budget (hostels, homestays)</option>
+                        <option value="standard" selected>Comfort (3-star hotels)</option>
+                        <option value="luxury">Premium (resorts)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="food">🍽️ Food preference</label>
+                    <select id="food" name="food">
+                        <option value="any" selected>Any food</option>
+                        <option value="veg">Vegetarian</option>
+                        <option value="nonveg">Non-vegetarian</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="form-group interests-group">
+                <label>✨ What kind of experience do you love?</label>
+
+                <div class="interest-options">
+
+                    <label class="interest">
+                        <input type="checkbox" name="interests" value="Nature">
+                        🌿 Nature
+                    </label>
+
+                    <label class="interest">
+                        <input type="checkbox" name="interests" value="Adventure">
+                        🏔️ Adventure
+                    </label>
+
+                    <label class="interest">
+                        <input type="checkbox" name="interests" value="Beaches">
+                        🏖️ Beaches
+                    </label>
+
+                    <label class="interest">
+                        <input type="checkbox" name="interests" value="Culture">
+                        🏛️ Culture
+                    </label>
+
+                    <label class="interest">
+                        <input type="checkbox" name="interests" value="Food">
+                        🍜 Food
+                    </label>
+
+                    <label class="interest">
+                        <input type="checkbox" name="interests" value="Photography">
+                        📸 Photography
+                    </label>
+
+                </div>
+            </div>
+
+            <button type="submit" class="generate-button">
+                ✨ Generate My AI Itinerary
+            </button>
+
+            <p class="form-note">
+                Your next adventure is just one click away.
+            </p>
+
+        </form>
+
+    </section>
+
+
+    <!-- What you get -->
+    <section class="block" id="features">
+        <div class="center-heading reveal">
+            <span class="eyebrow">WHAT YOU GET</span>
+            <h2>Everything for a stress-free trip</h2>
+            <p>Your plan comes with more than just a list of places.</p>
+        </div>
+
+        <div class="feature-grid">
+            <div class="feature reveal"><div class="ic">🧭</div><h3>Day-by-day itinerary</h3><p>Morning, afternoon and evening plans for every day of your trip.</p></div>
+            <div class="feature reveal d1"><div class="ic">💰</div><h3>Smart budget split</h3><p>See how your money divides across stay, food, transport and activities.</p></div>
+            <div class="feature reveal d2"><div class="ic">🗺️</div><h3>One-click maps</h3><p>Every attraction links straight to Google Maps for directions.</p></div>
+            <div class="feature reveal"><div class="ic">🎒</div><h3>Packing checklist</h3><p>A tick-off list that changes with the experiences you choose.</p></div>
+            <div class="feature reveal d1"><div class="ic">🍽️</div><h3>Food preferences</h3><p>Vegetarian, non-vegetarian or anything goes. Meals match your choice.</p></div>
+            <div class="feature reveal d2"><div class="ic">🖨️</div><h3>Print or copy</h3><p>Save your plan as a PDF or copy it to share with your travel buddies.</p></div>
+        </div>
+    </section>
+
+
+    <!-- Destination Inspiration -->
+    <section class="destinations-section" id="destinations">
+
+        <div class="destination-heading reveal">
+            <div>
+                <span class="eyebrow">EXPLORE THE WORLD</span>
+                <h2>Popular destinations</h2>
+                <p>Need inspiration? Start with one of these favorites.</p>
+            </div>
+        </div>
+
+        <div class="destination-grid">
+
+            <article class="destination-card ooty reveal">
+                <div class="destination-info">
+                    <span>🌿 HILLS & NATURE</span>
+                    <h3>Ooty, India</h3>
+                    <p>Tea gardens and misty mountains.</p>
+                    <button type="button" onclick="chooseDestination('Ooty, Tamil Nadu')">
+                        Plan this trip →
+                    </button>
+                </div>
+            </article>
+
+            <article class="destination-card bali reveal d1">
+                <div class="destination-info">
+                    <span>🌊 ISLAND ESCAPE</span>
+                    <h3>Bali, Indonesia</h3>
+                    <p>Tropical beaches and culture.</p>
+                    <button type="button" onclick="chooseDestination('Bali, Indonesia')">
+                        Plan this trip →
+                    </button>
+                </div>
+            </article>
+
+            <article class="destination-card manali reveal d2">
+                <div class="destination-info">
+                    <span>🏔️ MOUNTAIN ADVENTURE</span>
+                    <h3>Manali, India</h3>
+                    <p>Mountain views and adventure.</p>
+                    <button type="button" onclick="chooseDestination('Manali, Himachal Pradesh')">
+                        Plan this trip →
+                    </button>
+                </div>
+            </article>
+
+        </div>
+
+        <h3 class="sub-title reveal">More places to explore</h3>
+
+        <div class="mini-grid">
+            <button type="button" class="mini-card g1 reveal" onclick="chooseDestination('Goa')"><span class="big">🏖️</span><h3>Goa</h3><small>Beaches, forts and nightlife</small></button>
+            <button type="button" class="mini-card g2 reveal d1" onclick="chooseDestination('Munnar, Kerala')"><span class="big">🍃</span><h3>Munnar, Kerala</h3><small>Endless tea plantations</small></button>
+            <button type="button" class="mini-card g3 reveal d2" onclick="chooseDestination('Jaipur, Rajasthan')"><span class="big">🏰</span><h3>Jaipur, Rajasthan</h3><small>Royal forts and palaces</small></button>
+            <button type="button" class="mini-card g4 reveal" onclick="chooseDestination('Rishikesh, Uttarakhand')"><span class="big">🌊</span><h3>Rishikesh</h3><small>Rafting, yoga and the Ganga</small></button>
+            <button type="button" class="mini-card g5 reveal d1" onclick="chooseDestination('Pondicherry')"><span class="big">🌅</span><h3>Pondicherry</h3><small>French streets by the sea</small></button>
+            <button type="button" class="mini-card g6 reveal d2" onclick="chooseDestination('Kodaikanal, Tamil Nadu')"><span class="big">🌲</span><h3>Kodaikanal</h3><small>Lakes, pine forests and viewpoints</small></button>
+        </div>
+
+    </section>
+
+
+    <!-- FAQ -->
+    <section class="block" id="faq">
+        <div class="center-heading reveal">
+            <span class="eyebrow">GOT QUESTIONS?</span>
+            <h2>Frequently asked questions</h2>
+        </div>
+
+        <div class="faq">
+            <details class="reveal">
+                <summary>Is WanderWise AI free to use?</summary>
+                <p>Yes. Enter your trip details and get a full plan with no sign-up.</p>
+            </details>
+            <details class="reveal">
+                <summary>Are the budget numbers exact?</summary>
+                <p>No. They are estimates based on your travel mode and stay style. Always check current prices before booking.</p>
+            </details>
+            <details class="reveal">
+                <summary>Can I plan a trip to any place?</summary>
+                <p>Yes. Popular places like Ooty, Manali, Goa, Bali, Munnar and Jaipur have curated attractions. Other places get general suggestions you can open in Google Maps.</p>
+            </details>
+            <details class="reveal">
+                <summary>Can I save my itinerary?</summary>
+                <p>Use the Print / Save as PDF button or the Copy itinerary button on your results page.</p>
+            </details>
+        </div>
+    </section>
+
+
+    <!-- Call to action -->
+    <section class="cta reveal">
+        <h2>Ready for your next trip?</h2>
+        <p>Plan it in under a minute.</p>
+        <a href="#planner">Start planning →</a>
+    </section>
+
+
+    <!-- Footer -->
+    <footer>
+        <a href="#home" class="logo">✈ WanderWise <span>AI</span></a>
+
+        <p>Explore more. Worry less. Travel smarter.</p>
+
+        <small>© 2026 WanderWise AI · Made for curious travelers.</small>
+    </footer>
+
+    <button id="toTop" aria-label="Back to top">↑</button>
+
+
+    <!-- Planning Roadmap Overlay -->
+    <div class="roadmap-overlay" id="roadmapOverlay">
+        <div class="roadmap-box">
+            <span class="eyebrow">AI IS WORKING ON IT</span>
+            <h2 id="roadmapTitle">Planning your trip...</h2>
+
+            <ol class="roadmap">
+                <li>
+                    <span class="dot">1</span>
+                    <div>
+                        <strong>Understanding your preferences</strong>
+                        <small>Budget, travelers and interests</small>
+                    </div>
+                </li>
+                <li>
+                    <span class="dot">2</span>
+                    <div>
+                        <strong>Exploring the destination</strong>
+                        <small>Finding the best places to visit</small>
+                    </div>
+                </li>
+                <li>
+                    <span class="dot">3</span>
+                    <div>
+                        <strong>Building your day-by-day plan</strong>
+                        <small>Morning, afternoon and evening</small>
+                    </div>
+                </li>
+                <li>
+                    <span class="dot">4</span>
+                    <div>
+                        <strong>Calculating your budget</strong>
+                        <small>Stay, food, transport and activities</small>
+                    </div>
+                </li>
+                <li>
+                    <span class="dot">5</span>
+                    <div>
+                        <strong>Finalizing your itinerary</strong>
+                        <small>Almost ready!</small>
+                    </div>
+                </li>
+            </ol>
+
+            <div class="roadmap-bar"><div id="roadmapFill"></div></div>
+        </div>
+    </div>
+
+
+    <script>
+        function chooseDestination(destination) {
+            document.getElementById("destination").value = destination;
+
+            document.getElementById("planner").scrollIntoView({
+                behavior: "smooth"
+            });
+        }
+
+        /* ---- Hero slideshow ---- */
+        (function () {
+            const slides = document.querySelectorAll(".hero-slide");
+            const dots = document.querySelectorAll("#heroDots span");
+            const captions = [
+                ["✦ DESTINATION INSPIRATION", "Find your happy place.", "Adventure is waiting for you."],
+                ["🌿 HILLS & NATURE", "Misty hills, warm tea.", "Ooty's gardens and viewpoints."],
+                ["🌊 ISLAND ESCAPE", "Temples by the water.", "Bali's culture and calm."],
+                ["🏔️ MOUNTAIN ADVENTURE", "Snow peaks ahead.", "Manali's valleys and trails."]
+            ];
+            let n = 0;
+            setInterval(function () {
+                slides[n].classList.remove("active");
+                dots[n].classList.remove("on");
+                n = (n + 1) % slides.length;
+                slides[n].classList.add("active");
+                dots[n].classList.add("on");
+                document.getElementById("slideTag").textContent = captions[n][0];
+                document.getElementById("slideTitle").textContent = captions[n][1];
+                document.getElementById("slideText").textContent = captions[n][2];
+            }, 4000);
+        })();
+
+        /* ---- Reveal on scroll ---- */
+        (function () {
+            const items = document.querySelectorAll(".reveal");
+            if (!("IntersectionObserver" in window)) {
+                items.forEach(function (el) { el.classList.add("visible"); });
+                return;
+            }
+            const io = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add("visible");
+                        io.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.12 });
+            items.forEach(function (el) { io.observe(el); });
+        })();
+
+        /* ---- Navbar shadow + back to top ---- */
+        (function () {
+            const nav = document.getElementById("navbar");
+            const top = document.getElementById("toTop");
+            window.addEventListener("scroll", function () {
+                nav.classList.toggle("scrolled", window.scrollY > 20);
+                top.classList.toggle("show", window.scrollY > 600);
+            });
+            top.addEventListener("click", function () {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            });
+        })();
+
+        /* ---- Planning roadmap, then submit ---- */
+        const form = document.querySelector(".planner-form");
+        const overlay = document.getElementById("roadmapOverlay");
+        const fill = document.getElementById("roadmapFill");
+        let started = false;
+
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();          // wait until the roadmap finishes
+            if (started) return;         // stop double clicks
+            started = true;
+
+            const place = document.getElementById("destination").value;
+            document.getElementById("roadmapTitle").textContent = "Planning your trip to " + place;
+            overlay.classList.add("show");
+
+            const steps = overlay.querySelectorAll(".roadmap li");
+            let i = 0;
+
+            function nextStep() {
+                if (i > 0) {
+                    steps[i - 1].classList.remove("active");
+                    steps[i - 1].classList.add("done");
+                }
+                if (i < steps.length) {
+                    steps[i].classList.add("active");
+                    fill.style.width = ((i + 1) / steps.length) * 100 + "%";
+                    i++;
+                    setTimeout(nextStep, 900);
+                } else {
+                    steps[steps.length - 1].classList.remove("active");
+                    steps[steps.length - 1].classList.add("done");
+                    setTimeout(function () { form.submit(); }, 500);
+                }
+            }
+            nextStep();
+        });
+    </script>
+
+</body>
+</html>

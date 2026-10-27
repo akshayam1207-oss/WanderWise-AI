@@ -1,0 +1,174 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Itinerary | WanderWise AI</title>
+    <link rel="stylesheet" href="{% static 'myapp/style.css' %}">
+
+    <style>
+        .r-wrap { max-width: 1050px; margin: 0 auto; }
+        .r-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 18px; }
+        .r-chip { background: #fff; border: 1px solid var(--border); border-radius: 30px; padding: 8px 16px; font-size: 13px; font-weight: 600; }
+        .r-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 26px 0 10px; }
+        .r-btn { border: 1px solid var(--primary); background: #fff; color: var(--primary); padding: 11px 18px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; transition: .2s; }
+        .r-btn:hover { background: var(--primary); color: #fff; }
+        .r-btn.solid { background: var(--primary); color: #fff; }
+
+        .r-title { font-size: 22px; margin: 44px 0 18px; letter-spacing: -.5px; }
+
+        .r-timeline { position: relative; padding-left: 30px; }
+        .r-timeline::before { content: ""; position: absolute; left: 9px; top: 8px; bottom: 8px; width: 2px; background: var(--border); }
+        .r-day { position: relative; background: #fff; border: 1px solid var(--border); border-radius: 18px; padding: 24px 26px; margin-bottom: 20px; box-shadow: 0 12px 45px #343a6b0c; animation: rise .5s ease both; }
+        .r-day::before { content: ""; position: absolute; left: -29px; top: 28px; width: 16px; height: 16px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 0 5px #6755e822; }
+        @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+        .r-day-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 14px; }
+        .r-day-head h3 { color: var(--primary); font-size: 20px; }
+        .r-day-head small { color: var(--muted); font-size: 12px; }
+        .r-theme { font-size: 13px; color: var(--muted); margin-bottom: 12px; font-weight: 600; }
+        .r-slot { display: grid; grid-template-columns: 110px 1fr; gap: 10px; padding: 9px 0; border-top: 1px dashed var(--border); font-size: 14px; }
+        .r-slot b { font-size: 13px; }
+        .r-slot a { color: var(--primary); font-weight: 600; }
+        .r-slot a:hover { text-decoration: underline; }
+        .r-daycost { margin-top: 10px; font-size: 12px; color: var(--muted); }
+
+        .r-two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+        .r-card { background: #fff; border: 1px solid var(--border); border-radius: 18px; padding: 26px; box-shadow: 0 12px 45px #343a6b0c; }
+        .r-card h3 { margin-bottom: 14px; }
+
+        .r-bar-row { margin-bottom: 16px; }
+        .r-bar-top { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 6px; }
+        .r-bar { height: 9px; border-radius: 10px; background: #ececf7; overflow: hidden; }
+        .r-bar div { height: 100%; width: 0; border-radius: 10px; background: linear-gradient(90deg, var(--primary), #4aa3ff); transition: width 1s ease; }
+
+        .r-check { display: flex; align-items: center; gap: 10px; padding: 7px 0; font-size: 14px; cursor: pointer; }
+        .r-check input { accent-color: var(--primary); width: 17px; height: 17px; }
+        .r-check input:checked + span { text-decoration: line-through; color: var(--muted); }
+        .r-tips { list-style: none; }
+        .r-tips li { padding: 8px 0 8px 26px; position: relative; font-size: 14px; }
+        .r-tips li::before { content: "💡"; position: absolute; left: 0; }
+        .r-note { text-align: center; color: var(--muted); font-size: 12px; margin-top: 30px; }
+
+        @media (max-width: 800px) {
+            .r-two { grid-template-columns: 1fr; }
+            .r-slot { grid-template-columns: 1fr; gap: 2px; }
+        }
+        @media print {
+            .navbar, .r-actions, .r-btn { display: none !important; }
+            .r-day, .r-card { box-shadow: none; break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="/" class="logo">✈ WanderWise <span>AI</span></a>
+    <a href="/" class="nav-button">Plan Another Trip</a>
+</nav>
+
+<section class="planner-section">
+    <div class="r-wrap">
+
+        <div class="section-heading">
+            <span class="eyebrow">YOUR PERSONALISED PLAN</span>
+            <h2>{{ duration }}-day trip to {{ destination }}</h2>
+            <p>
+                {{ travelers }} traveler(s) · ₹{{ budget }} total · about ₹{{ per_person_per_day }} per person per day
+                {% if start_date %}<br>📅 {{ start_date }} → {{ end_date }}{% endif %}
+            </p>
+
+            <div class="r-chips">
+                <span class="r-chip">🚗 {{ mode_label }}</span>
+                <span class="r-chip">🏨 {{ stay_label }}</span>
+                <span class="r-chip">🍽️ {{ food_label }}</span>
+                {% for i in interests %}<span class="r-chip">✨ {{ i }}</span>{% endfor %}
+            </div>
+        </div>
+
+        <div class="r-actions">
+            <button class="r-btn solid" onclick="window.print()">🖨️ Print / Save as PDF</button>
+            <button class="r-btn" id="copyBtn">📋 Copy itinerary</button>
+            <a class="r-btn" href="{{ map_url }}" target="_blank" rel="noopener">🗺️ Open map</a>
+            <a class="r-btn" href="{{ weather_url }}" target="_blank" rel="noopener">🌦️ Check weather</a>
+        </div>
+
+        <h3 class="r-title">🧭 Day-by-day itinerary</h3>
+        <div class="r-timeline" id="itinerary">
+            {% for day in days %}
+            <div class="r-day" style="animation-delay: {{ forloop.counter0 }}00ms">
+                <div class="r-day-head">
+                    <h3>Day {{ day.number }}</h3>
+                    {% if day.date %}<small>{{ day.date }}</small>{% endif %}
+                </div>
+                <div class="r-theme">{{ day.theme }}</div>
+
+                <div class="r-slot"><b>🌅 Morning</b><span><a href="{{ day.morning.url }}" target="_blank" rel="noopener">{{ day.morning.name }} ↗</a></span></div>
+                <div class="r-slot"><b>☀️ Afternoon</b><span><a href="{{ day.afternoon.url }}" target="_blank" rel="noopener">{{ day.afternoon.name }} ↗</a></span></div>
+                <div class="r-slot"><b>🌙 Evening</b><span>{{ day.evening }}</span></div>
+                <div class="r-slot"><b>🍜 Food</b><span>{{ day.food }}</span></div>
+                <div class="r-daycost">Estimated spend for the day: about ₹{{ day.cost }} (whole group)</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <h3 class="r-title">💰 Budget breakdown</h3>
+        <div class="r-card">
+            <p style="margin-bottom:18px;font-size:14px;color:var(--muted);">
+                {{ stay_hint }}. About ₹{{ per_person_total }} per person in total.
+            </p>
+            {% for row in budget_rows %}
+            <div class="r-bar-row">
+                <div class="r-bar-top"><span>{{ row.label }}</span><strong>₹{{ row.amount }} · {{ row.percent }}%</strong></div>
+                <div class="r-bar"><div data-width="{{ row.percent }}"></div></div>
+            </div>
+            {% endfor %}
+            <p class="form-note">Costs are estimates. Check current prices before booking.</p>
+        </div>
+
+        <div class="r-two" style="margin-top:30px;">
+            <div class="r-card">
+                <h3>🎒 Packing checklist</h3>
+                {% for item in packing %}
+                <label class="r-check"><input type="checkbox"><span>{{ item }}</span></label>
+                {% endfor %}
+            </div>
+            <div class="r-card">
+                <h3>💡 Travel tips</h3>
+                <ul class="r-tips">
+                    {% for tip in tips %}<li>{{ tip }}</li>{% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <p class="r-note">Attractions and prices are suggestions. Please verify opening hours and current costs before you go.</p>
+
+        <div class="r-actions">
+            <a class="r-btn solid" href="/">← Plan Another Trip</a>
+        </div>
+
+    </div>
+</section>
+
+<script>
+    // Animate the budget bars
+    window.addEventListener("load", function () {
+        document.querySelectorAll(".r-bar div").forEach(function (bar) {
+            bar.style.width = bar.dataset.width + "%";
+        });
+    });
+
+    // Copy itinerary as text
+    document.getElementById("copyBtn").addEventListener("click", function () {
+        const text = "{{ duration }}-day trip to {{ destination }}\n\n" +
+            document.getElementById("itinerary").innerText;
+        const btn = this;
+        navigator.clipboard.writeText(text).then(function () {
+            btn.textContent = "✅ Copied!";
+            setTimeout(function () { btn.textContent = "📋 Copy itinerary"; }, 1800);
+        });
+    });
+</script>
+
+</body>
+</html>
