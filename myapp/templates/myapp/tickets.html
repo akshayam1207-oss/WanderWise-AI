@@ -1,0 +1,415 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }}</title>
+    <link rel="stylesheet" href="{% static 'myapp/style.css' %}">
+
+    <style>
+        .page-header {
+            background: linear-gradient(135deg, #10152c, #1f2852);
+            color: #ffffff;
+            padding: 60px 7% 50px;
+            text-align: center;
+        }
+        .page-header h1 {
+            font-size: clamp(30px, 4vw, 42px);
+            letter-spacing: -1px;
+            margin: 10px 0 10px;
+        }
+        .page-header p {
+            color: #b3b9d4;
+            max-width: 650px;
+            margin: 0 auto;
+            font-size: 15px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: -30px auto 80px;
+            padding: 0 20px;
+        }
+
+        /* Stats Bar */
+        .ticket-stats-bar {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 20px 28px;
+            box-shadow: 0 16px 45px rgba(52, 58, 107, 0.08);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        .stat-badge {
+            font-size: 13px;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: #f1edff;
+            color: var(--primary);
+        }
+
+        /* 2 Column Layout: Create Ticket Form + Ticket List */
+        .crud-grid {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 26px;
+        }
+
+        .create-ticket-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 26px;
+            box-shadow: 0 10px 30px rgba(52, 58, 107, 0.05);
+            height: fit-content;
+        }
+        .create-ticket-card h3 {
+            font-size: 18px;
+            margin-bottom: 6px;
+            color: var(--primary);
+        }
+        .create-ticket-card p {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 18px;
+        }
+
+        .tck-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .tck-form input,
+        .tck-form select,
+        .tck-form textarea {
+            padding: 10px 14px;
+            border: 1px solid #dcdde8;
+            border-radius: 10px;
+            font-size: 13.5px;
+            outline: none;
+            font-family: inherit;
+        }
+        .tck-form input:focus,
+        .tck-form select:focus,
+        .tck-form textarea:focus {
+            border-color: var(--primary);
+        }
+        .btn-create-tck {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-create-tck:hover { background: var(--primary-dark); }
+
+        /* Tickets List Section */
+        .tickets-list-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 26px;
+            box-shadow: 0 10px 30px rgba(52, 58, 107, 0.05);
+        }
+        .list-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .list-header h3 { font-size: 18px; margin: 0; }
+        .search-ticket-form {
+            display: flex;
+            gap: 8px;
+        }
+        .search-ticket-form input {
+            padding: 8px 12px;
+            border: 1px solid #dcdde8;
+            border-radius: 8px;
+            font-size: 12.5px;
+        }
+        .search-ticket-form button {
+            background: #f1edff;
+            color: var(--primary);
+            border: 1px solid #ddd6fe;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 12.5px;
+            cursor: pointer;
+        }
+
+        .tickets-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .tickets-table th {
+            background: #f8f9ff;
+            padding: 12px 14px;
+            text-align: left;
+            border-bottom: 2px solid var(--border);
+            color: var(--text);
+        }
+        .tickets-table td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #f0f0f7;
+            vertical-align: middle;
+        }
+        .badge-tck-open { background: #fee2e2; color: #b91c1c; padding: 3px 8px; border-radius: 6px; font-weight: 700; font-size: 11px; }
+        .badge-tck-progress { background: #fef3c7; color: #b45309; padding: 3px 8px; border-radius: 6px; font-weight: 700; font-size: 11px; }
+        .badge-tck-resolved { background: #dcfce7; color: #15803d; padding: 3px 8px; border-radius: 6px; font-weight: 700; font-size: 11px; }
+
+        .btn-tck-action {
+            padding: 5px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: #fff;
+            cursor: pointer;
+            font-size: 11.5px;
+            font-weight: 600;
+            margin-right: 4px;
+        }
+        .btn-tck-resolve { color: #16a34a; border-color: #86efac; }
+        .btn-tck-resolve:hover { background: #dcfce7; }
+        .btn-tck-del { color: #dc2626; border-color: #fca5a5; }
+        .btn-tck-del:hover { background: #fee2e2; }
+
+        @media (max-width: 900px) {
+            .crud-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <a href="/" class="logo">✈ WanderWise <span>AI</span></a>
+
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/destinations/">Destinations</a>
+            <a href="/faq/">FAQ</a>
+            <a href="/health/">System Health</a>
+            <a href="/errors/">Error Guide</a>
+            <a href="/tickets/" style="color:var(--primary);font-weight:700;">Tickets (CRUD)</a>
+        </div>
+
+        <a href="/#planner" class="nav-button">Plan a Trip ↗</a>
+    </nav>
+
+    <header class="page-header">
+        <h1>Support Ticket Management Portal (CRUD)</h1>
+        <p>Complete Create, Read, Update, and Delete operations for support tickets stored in the SQL database.</p>
+    </header>
+
+    <main class="container">
+        <!-- Summary Bar -->
+        <div class="ticket-stats-bar">
+            <div>
+                <span class="stat-badge">🗄️ SQL Storage Active</span>
+                <span style="margin-left:12px;font-size:13.5px;color:var(--text);">
+                    Total Tickets: <strong>{{ total_tickets }}</strong> · Open: <strong style="color:#dc2626;">{{ open_count }}</strong> · Resolved: <strong style="color:#16a34a;">{{ resolved_count }}</strong>
+                </span>
+            </div>
+            <a href="/admin/myapp/supportticket/" target="_blank" class="nav-button" style="padding:8px 16px;font-size:12.5px;">
+                Open Django Admin (CRUD) ↗
+            </a>
+        </div>
+
+        <!-- Searched Ticket Highlight if requested -->
+        {% if searched_ticket %}
+        <div style="background:#f1edff;border:1px solid #ddd6fe;border-radius:14px;padding:18px 22px;margin-bottom:24px;">
+            <h4 style="color:var(--primary);margin:0 0 6px;">🔍 Ticket Search Result: {{ searched_ticket.ticket_id }}</h4>
+            <p style="margin:0 0 8px;font-size:13.5px;"><strong>Subject:</strong> {{ searched_ticket.subject }} | <strong>Status:</strong> {{ searched_ticket.status }} | <strong>User:</strong> {{ searched_ticket.name }} ({{ searched_ticket.email }})</p>
+            <p style="margin:0;font-size:13px;color:#555;"><strong>Message:</strong> {{ searched_ticket.message }}</p>
+        </div>
+        {% elif search_id %}
+        <div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:14px;padding:14px 20px;margin-bottom:24px;color:#991b1b;font-size:13.5px;">
+            ⚠️ No ticket found with ID "{{ search_id }}" in the SQL database.
+        </div>
+        {% endif %}
+
+        <div class="crud-grid">
+            <!-- 1. CREATE TICKET FORM -->
+            <div class="create-ticket-card">
+                <h3>Create New Support Ticket</h3>
+                <p>Creates a new ticket record stored in the SQL database.</p>
+
+                <form class="tck-form" onsubmit="createTicketFromPortal(event)">
+                    <input type="text" id="portal-tck-name" placeholder="Full Name" required>
+                    <input type="email" id="portal-tck-email" placeholder="Email Address" required>
+                    <select id="portal-tck-cat">
+                        <option value="General Inquiry">General Inquiry</option>
+                        <option value="Trip Planning Issue">Trip Planning Issue</option>
+                        <option value="Error Code Assistance">Error Code Assistance</option>
+                        <option value="Feedback & Suggestions">Feedback & Suggestions</option>
+                    </select>
+                    <input type="text" id="portal-tck-subject" placeholder="Subject" required>
+                    <textarea id="portal-tck-message" rows="4" placeholder="Detailed message..." required></textarea>
+                    <button type="submit" class="btn-create-tck" id="portal-submit-btn">Create Ticket in SQL →</button>
+                </form>
+            </div>
+
+            <!-- 2. READ, UPDATE, DELETE TICKETS LIST -->
+            <div class="tickets-list-card">
+                <div class="list-header">
+                    <h3>Stored Tickets (SQL Database)</h3>
+                    <form class="search-ticket-form" method="GET" action="{% url 'tickets' %}">
+                        <input type="text" name="ticket_id" value="{{ search_id }}" placeholder="Lookup Ticket ID (e.g. WW-TCK-...)">
+                        <button type="submit">Search</button>
+                    </form>
+                </div>
+
+                <div style="overflow-x:auto;">
+                    <table class="tickets-table">
+                        <thead>
+                            <tr>
+                                <th>Ticket ID</th>
+                                <th>User</th>
+                                <th>Subject</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions (CRUD)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if tickets %}
+                                {% for t in tickets %}
+                                <tr id="row-{{ t.ticket_id }}">
+                                    <td><strong><code>{{ t.ticket_id }}</code></strong></td>
+                                    <td>{{ t.name }}<br><small style="color:var(--muted);">{{ t.email }}</small></td>
+                                    <td>{{ t.subject }}</td>
+                                    <td>
+                                        {% if t.status == 'OPEN' %}
+                                            <span class="badge-tck-open">OPEN</span>
+                                        {% elif t.status == 'RESOLVED' %}
+                                            <span class="badge-tck-resolved">RESOLVED</span>
+                                        {% else %}
+                                            <span class="badge-tck-progress">{{ t.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td><small>{{ t.created_at|date:"d M Y" }}</small></td>
+                                    <td>
+                                        {% if t.status != 'RESOLVED' %}
+                                        <button type="button" class="btn-tck-action btn-tck-resolve" onclick="updateTicketStatus('{{ t.ticket_id }}', 'RESOLVED')">
+                                            ✓ Resolve
+                                        </button>
+                                        {% else %}
+                                        <button type="button" class="btn-tck-action" onclick="updateTicketStatus('{{ t.ticket_id }}', 'OPEN')">
+                                            Re-open
+                                        </button>
+                                        {% endif %}
+                                        <button type="button" class="btn-tck-action btn-tck-del" onclick="deleteTicket('{{ t.ticket_id }}')">
+                                            ✕
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" style="text-align:center;padding:24px;color:var(--muted);">
+                                        No support tickets in SQL database. Create one using the form on the left!
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <a href="/" class="logo">✈ WanderWise <span>AI</span></a>
+        <p>Explore more. Worry less. Travel smarter.</p>
+        <small>© 2026 WanderWise AI · Complete CRUD Support Ticket System in SQL.</small>
+    </footer>
+
+    {% include "myapp/chat_widget.html" %}
+
+    <script>
+    function createTicketFromPortal(e) {
+        e.preventDefault();
+        const btn = document.getElementById("portal-submit-btn");
+        btn.disabled = true;
+        btn.textContent = "Saving to SQL...";
+
+        const payload = {
+            name: document.getElementById("portal-tck-name").value,
+            email: document.getElementById("portal-tck-email").value,
+            category: document.getElementById("portal-tck-cat").value,
+            subject: document.getElementById("portal-tck-subject").value,
+            message: document.getElementById("portal-tck-message").value
+        };
+
+        fetch("/api/support-ticket/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.textContent = "Create Ticket in SQL →";
+            if (data.success) {
+                alert("✅ Success: " + data.message);
+                location.reload();
+            } else {
+                alert("Error: " + (data.error || "Failed to create ticket"));
+            }
+        });
+    }
+
+    function updateTicketStatus(ticketId, newStatus) {
+        if (!confirm("Update ticket " + ticketId + " status to " + newStatus + "?")) return;
+        fetch("/api/support-ticket/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "update", ticket_id: ticketId, status: newStatus })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert("Update failed: " + (data.error || "Unknown error"));
+            }
+        });
+    }
+
+    function deleteTicket(ticketId) {
+        if (!confirm("Are you sure you want to delete ticket " + ticketId + " from the SQL database?")) return;
+        fetch("/api/support-ticket/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "delete", ticket_id: ticketId })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                const row = document.getElementById("row-" + ticketId);
+                if (row) row.remove();
+                alert("Ticket " + ticketId + " deleted successfully.");
+            } else {
+                alert("Delete failed: " + (data.error || "Unknown error"));
+            }
+        });
+    }
+    </script>
+</body>
+</html>

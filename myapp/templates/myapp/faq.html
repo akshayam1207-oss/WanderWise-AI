@@ -206,6 +206,7 @@
             <a href="/faq/" style="color:var(--primary);font-weight:700;">FAQ</a>
             <a href="/health/">System Health</a>
             <a href="/errors/">Error Guide</a>
+            <a href="/tickets/">Tickets (CRUD)</a>
         </div>
 
         <a href="/#planner" class="nav-button">Plan a Trip ↗</a>
@@ -233,6 +234,9 @@
                     {{ cat }}
                 </a>
                 {% endfor %}
+                <a href="/api/faqs/" target="_blank" class="cat-chip" style="background:#e0f2fe;color:#0369a1;border-color:#bae6fd;">
+                    ⚡ Fetch from SQL API (/api/faqs/) ↗
+                </a>
             </div>
         </div>
 

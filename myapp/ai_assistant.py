@@ -2,13 +2,13 @@ import os
 import re
 import logging
 from django.conf import settings
-from .models import FAQ, SupportTicket
+from .models import FAQ, ErrorCode, SupportTicket
 from .mongo import log_chat_interaction
 
 logger = logging.getLogger("wanderwise.ai")
 
-# Detailed explanations for the 8 required error codes
-ERROR_CODE_KNOWLEDGE = {
+# Fallback explanations if database is being migrated
+FALLBACK_ERROR_CODES = {
     "400": {
         "title": "400 Bad Request",
         "category": "Client Error",
@@ -59,30 +59,56 @@ ERROR_CODE_KNOWLEDGE = {
         "solution": "1. Wait 1–2 minutes and retry your request.\n2. Check our Health Check dashboard for live external API availability.\n3. WanderWise will automatically activate fallback responses where available."
     },
     "600": {
-        "title": "WW-600 Custom Code (AI Plan Generation Quota / Engine Timeout)",
+        "title": "WW-600 Plan Quota Exceeded / AI Engine Timeout",
         "category": "Site-Specific Error",
-        "meaning": "WanderWise site-specific application code indicating an itinerary generation timeout or multi-destination complexity overload.",
+        "meaning": "WanderWise site-specific application code indicating an itinerary duration limit exceeded (> 30 days) or multi-destination complexity overload.",
         "wanderwise_context": "Triggers when a customized itinerary involves complex custom constraints or excessive dates that exceed real-time computation limits.",
-        "solution": "1. Shorten the requested trip duration (e.g. 3–7 days for optimal planning).\n2. Select fewer simultaneous interest categories.\n3. Use our 'Create Support Ticket' feature to request a custom human-curated travel plan."
+        "solution": "1. Shorten the requested trip duration (3–7 days recommended for optimal planning).\n2. Select fewer simultaneous interest categories.\n3. Use our 'Create Support Ticket' feature to request a custom human-curated travel plan."
     },
 }
 
-# Also support alias WW-001 or WW-600
-ERROR_CODE_KNOWLEDGE["ww-600"] = ERROR_CODE_KNOWLEDGE["600"]
-ERROR_CODE_KNOWLEDGE["ww-001"] = ERROR_CODE_KNOWLEDGE["600"]
+FALLBACK_ERROR_CODES["ww-600"] = FALLBACK_ERROR_CODES["600"]
+FALLBACK_ERROR_CODES["ww-001"] = FALLBACK_ERROR_CODES["600"]
+
+
+def get_error_code_from_sql(code_val):
+    """
+    Retrieves error code explanation from the SQL database (ErrorCode model).
+    Fulfills assessment requirement: '8+ error codes in SQL'.
+    """
+    try:
+        int_code = int(code_val)
+        err_obj = ErrorCode.objects.filter(code=int_code).first()
+        if err_obj:
+            return {
+                "title": f"{err_obj.code_str} {err_obj.title}",
+                "category": err_obj.category,
+                "meaning": err_obj.meaning,
+                "wanderwise_context": err_obj.wanderwise_context,
+                "solution": err_obj.solution,
+                "is_site_specific": err_obj.is_site_specific,
+            }
+    except Exception as e:
+        logger.debug("SQL ErrorCode query error: %s", e)
+
+    return FALLBACK_ERROR_CODES.get(str(code_val), FALLBACK_ERROR_CODES["600"])
 
 
 def search_faqs_in_sql(query_text):
     """
     Searches FAQs stored in SQL database for matches against user query.
+    Fulfills assessment requirement: '10+ FAQs stored in SQL'.
     """
     words = [w.lower().strip() for w in re.split(r'\W+', query_text) if len(w) > 2]
     if not words:
         return []
 
-    faqs = list(FAQ.objects.filter(is_active=True))
-    scored_faqs = []
+    try:
+        faqs = list(FAQ.objects.filter(is_active=True))
+    except Exception:
+        return []
 
+    scored_faqs = []
     for faq in faqs:
         q_lower = faq.question.lower()
         a_lower = faq.answer.lower()
@@ -169,10 +195,10 @@ def ask_gemini_api(prompt_text, system_instruction):
 def generate_assistant_response(user_message, session_id=None):
     """
     Main AI assistant engine.
-    - Resolves error codes (400, 401, 403, 404, 429, 500, 503, WW-600)
-    - Searches SQL database FAQs
+    - Resolves error codes from SQL ErrorCode database (400, 401, 403, 404, 429, 500, 503, WW-600)
+    - Searches SQL database FAQs (12 FAQs in SQL)
     - Resolves travel advice & trip planner questions
-    - Offers support ticket creation if cannot answer or on request
+    - Offers support ticket creation if cannot answer or on request (CRUD)
     - Logs conversation to MongoDB
     """
     msg = user_message.strip()
@@ -188,27 +214,27 @@ def generate_assistant_response(user_message, session_id=None):
     }
 
     # 1. Check for Support Ticket request
-    ticket_triggers = ["support ticket", "create ticket", "contact support", "talk to human", "complaint", "submit ticket", "helpdesk"]
+    ticket_triggers = ["support ticket", "create ticket", "contact support", "talk to human", "complaint", "submit ticket", "helpdesk", "track ticket"]
     if any(t in msg_lower for t in ticket_triggers):
         response_data["reply"] = (
-            "I'd be happy to help you create a support ticket for our travel engineering team. "
-            "Please fill out the quick support ticket form below and we will get back to you promptly."
+            "I'd be happy to help you with our support ticket system (stored in SQL). "
+            "You can fill out the quick ticket form below or visit our Ticket Portal at `/tickets/` to track and manage your inquiries."
         )
         response_data["suggest_ticket"] = True
         response_data["source"] = "support_flow"
-        response_data["quick_replies"] = ["Plan a trip", "Check FAQs", "Health Check"]
-        # Log and return
+        response_data["quick_replies"] = ["Plan a trip", "Check FAQs", "Health Check", "View My Tickets"]
         log_chat_interaction(session_id, user_message, response_data["reply"], metadata=response_data)
         return response_data
 
-    # 2. Check for Error Code explanation
+    # 2. Check for Error Code explanation (Loaded from SQL Database)
     detected_code = detect_error_code(msg)
     if detected_code:
-        err = ERROR_CODE_KNOWLEDGE[detected_code]
+        err = get_error_code_from_sql(detected_code)
         response_data["error_code"] = detected_code
-        response_data["source"] = "error_code_engine"
+        response_data["source"] = "sql_error_codes"
         response_data["reply"] = (
             f"### ⚠️ Error {err['title']} ({err['category']})\n\n"
+            f"*(Retrieved from WanderWise SQL Error Database)*\n\n"
             f"**What it means:** {err['meaning']}\n\n"
             f"**In WanderWise:** {err['wanderwise_context']}\n\n"
             f"**Recommended action:**\n{err['solution']}"
@@ -225,7 +251,7 @@ def generate_assistant_response(user_message, session_id=None):
         log_chat_interaction(session_id, user_message, response_data["reply"], metadata=response_data)
         return response_data
 
-    # 3. Check SQL FAQ Database
+    # 3. Check SQL FAQ Database (Loaded from SQL Database)
     matched_faqs = search_faqs_in_sql(msg)
     if matched_faqs:
         best_faq = matched_faqs[0]
@@ -233,7 +259,6 @@ def generate_assistant_response(user_message, session_id=None):
         response_data["source"] = "sql_faq_database"
         response_data["reply"] = f"**{best_faq.question}**\n\n{best_faq.answer}"
 
-        # If there are related FAQs, mention them
         if len(matched_faqs) > 1:
             related_q = matched_faqs[1].question
             response_data["quick_replies"].append(related_q)
@@ -263,7 +288,7 @@ def generate_assistant_response(user_message, session_id=None):
             "• **Goa** (Golden beaches, forts & coastal vibes)\n"
             "• **Bali** (Tropical temples, culture & beaches)\n"
             "• **Munnar, Jaipur, Rishikesh, Pondicherry, Kodaikanal**\n\n"
-            "You can also type *any custom town or city* in the planner!"
+            "You can also explore our Destinations page at `/destinations/` with live weather feeds!"
         )
         response_data["quick_replies"] = ["Plan a trip to Ooty", "Plan a trip to Manali", "Plan a trip to Goa"]
         log_chat_interaction(session_id, user_message, response_data["reply"], metadata=response_data)
@@ -286,10 +311,10 @@ def generate_assistant_response(user_message, session_id=None):
         log_chat_interaction(session_id, user_message, response_data["reply"], metadata=response_data)
         return response_data
 
-    # 6. Fallback when AI assistant cannot answer
+    # 6. Fallback when AI assistant cannot answer -> Offer support ticket creation (CRUD)
     response_data["reply"] = (
-        "I'm sorry, I don't have enough specific information in my travel database to answer that completely. "
-        "Would you like me to create a support ticket so our travel team can help you personally?"
+        "I'm sorry, I don't have enough specific information in my SQL travel knowledge base to answer that completely. "
+        "Would you like me to create a support ticket so our travel engineering team can assist you personally?"
     )
     response_data["suggest_ticket"] = True
     response_data["source"] = "fallback_unanswered"

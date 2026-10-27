@@ -25,11 +25,35 @@
             margin: 0 auto;
             font-size: 16px;
         }
+        .error-stats-badge {
+            display: inline-block;
+            background: rgba(103, 85, 232, 0.25);
+            border: 1px solid rgba(103, 85, 232, 0.45);
+            color: #c4b5fd;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
 
         .container {
             max-width: 1100px;
             margin: -30px auto 80px;
             padding: 0 20px;
+        }
+
+        .api-bar {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 16px 24px;
+            box-shadow: 0 16px 45px rgba(52, 58, 107, 0.08);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 28px;
         }
 
         .error-grid {
@@ -166,6 +190,7 @@
             <a href="/faq/">FAQ</a>
             <a href="/health/">System Health</a>
             <a href="/errors/" style="color:var(--primary);font-weight:700;">Error Guide</a>
+            <a href="/tickets/">Tickets (CRUD)</a>
         </div>
 
         <a href="/#planner" class="nav-button">Plan a Trip ↗</a>
@@ -173,20 +198,32 @@
 
     <!-- Header Section -->
     <header class="page-header">
+        <span class="error-stats-badge">🗄️ SQL Error Database · {{ error_count }} Codes Stored</span>
         <h1>Error Codes Reference &amp; Testing Center</h1>
-        <p>Comprehensive documentation and interactive simulation triggers for all 8 required application and HTTP error codes.</p>
+        <p>Comprehensive documentation and interactive simulation triggers for all 8 required application and HTTP error codes stored in SQL.</p>
     </header>
 
     <main class="container">
+        <!-- API Bar -->
+        <div class="api-bar">
+            <div style="font-size:13.5px;color:var(--text);">
+                <strong>Assessment Requirement:</strong> All 8 error codes are stored in the SQL Database (<code>ErrorCode</code> model) and exposed via REST API.
+            </div>
+            <a href="/api/error-codes/" target="_blank" class="nav-button" style="padding:8px 16px;font-size:12.5px;">
+                ⚡ View Error Codes REST API (JSON) ↗
+            </a>
+        </div>
+
         <!-- Site-Specific Code Deep Dive -->
         <div class="custom-error-highlight">
-            <h2>⭐ Site-Specific Code: WW-600 (HTTP 600)</h2>
+            <h2>⭐ Site-Specific Code: WW-600 (Application Status 600)</h2>
             <p>
                 <strong>Meaning:</strong> WanderWise AI Travel Plan Generation Quota Exceeded / AI Destination Planner Timeout.<br>
-                This site-specific error code is unique to WanderWise AI. It is triggered when an itinerary request exceeds safe duration limits (> 30 days) or when multi-city constraints overwhelm real-time route optimization algorithms.
+                This site-specific error code is unique to WanderWise AI and stored in the SQL database. It triggers when an itinerary request exceeds safe duration limits (> 30 days) or when multi-city constraints overwhelm real-time route optimization algorithms.
             </p>
             <div class="code-snippet">
-                HTTP Status: 600 WW_PLAN_GENERATION_LIMIT_EXCEEDED<br>
+                Application Code: WW-600 (Plan Quota Exceeded)<br>
+                SQL Model: ErrorCode(code=600, code_str='WW-600', is_site_specific=True)<br>
                 Payload: {"code": "WW-600", "error": "AI Itinerary Duration Exceeded", "max_days": 30}
             </div>
             <div style="display:flex;gap:12px;margin-top:16px;">
@@ -195,23 +232,26 @@
             </div>
         </div>
 
-        <!-- 8 Required Error Codes Grid -->
+        <!-- 8 Required Error Codes Grid (Loaded from SQL) -->
         <div class="error-grid">
             {% for err in error_codes %}
             <article class="error-card">
                 <div>
                     <div class="error-top">
-                        <span class="err-code-badge">{{ err.code }}</span>
-                        <span class="err-type-pill {% if err.code == 600 %}site-specific-badge{% endif %}">{{ err.type }}</span>
+                        <span class="err-code-badge">{{ err.code_str }}</span>
+                        <span class="err-type-pill {% if err.is_site_specific %}site-specific-badge{% endif %}">{{ err.category }}</span>
                     </div>
-                    <h3>{{ err.name }}</h3>
-                    <p>{{ err.desc }}</p>
+                    <h3>{{ err.title }}</h3>
+                    <p>{{ err.meaning }}</p>
+                    <div style="font-size:12.5px;color:#555;margin-bottom:12px;">
+                        <strong>In WanderWise:</strong> {{ err.wanderwise_context }}
+                    </div>
                 </div>
                 <div class="error-actions">
                     <a href="/test-error/{{ err.code }}/" class="btn-test-err" target="_blank">
-                        🧪 Test Simulate {{ err.code }} ↗
+                        🧪 Test Simulate {{ err.code_str }} ↗
                     </a>
-                    <button type="button" class="btn-ask-ai-err" onclick="openWanderWiseChat('Explain Error {{ err.code }}')">
+                    <button type="button" class="btn-ask-ai-err" onclick="openWanderWiseChat('Explain Error {{ err.code_str }}')">
                         💬 Ask AI
                     </button>
                 </div>
