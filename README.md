@@ -10,7 +10,7 @@ An intelligent, full-stack travel planning platform and customer support website
 
 ## 🌐 Live Website & Assessment Submission Details
 
-- **Live HTTPS Website URL:** [https://wanderwise-ai.onrender.com](https://wanderwise-ai.onrender.com) *(or your deployed Render service domain)*
+- **Live HTTPS Website URL:** [https://wanderwise-ai.onrender.com](https://wanderwise-ai-mi52.onrender.com/) *(or your deployed Render service domain)*
 - **GitHub Repository:** [https://github.com/akshayam1207-oss/WanderWise-AI](https://github.com/akshayam1207-oss/WanderWise-AI)
 - **Task Sheet Link:** [Software Development Final Assessment Sheet](https://docs.google.com/spreadsheets/d/1gac3qN_sFgbBQR7utv6N-66-C8szNq3-F6L7NQsbx78/edit?usp=sharing)
 - **Individual Task Title:** *Personal Travel Planning Website with Integrated AI Support Assistant & Observability*
